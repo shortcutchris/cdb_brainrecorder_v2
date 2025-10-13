@@ -225,7 +225,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
       <Modal
         visible={showRenameModal}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setShowRenameModal(false)}
       >
         <Pressable
@@ -236,11 +236,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={styles.modalHandle} />
-
-            <Text style={styles.modalTitle}>
-              Umbenennen
-            </Text>
+            <Text style={styles.modalTitle}>Umbenennen</Text>
 
             <TextInput
               value={newName}
@@ -400,21 +396,21 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 16,
     padding: 24,
-  },
-  modalHandle: {
-    width: 48,
-    height: 4,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 16,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   modalTitle: {
     fontSize: 20,
