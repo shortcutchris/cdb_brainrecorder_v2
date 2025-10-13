@@ -110,29 +110,47 @@ export default function RecordingItem({
             <Text style={[styles.title, { color: colors.text }]}>
               {recording.name}
             </Text>
-            {/* Status Badge (Compact - right of title) */}
+            {/* Status Badges (Icon-Only - right of title) */}
             {recording.transcript?.status === 'processing' && (
-              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.primary + '20' }]}>
-                <ActivityIndicator size="small" color={colors.primary} style={styles.badgeSpinner} />
-                <Text style={[styles.statusBadgeText, { color: colors.primary }]}>Trans.</Text>
+              <View style={[styles.statusBadgeIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="document-text" size={16} color={colors.primary} />
+                <ActivityIndicator
+                  size="small"
+                  color={colors.primary}
+                  style={styles.badgeSpinnerOverlay}
+                />
               </View>
             )}
             {showCompletedBadge.transcript && (
-              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
-                <Ionicons name="checkmark-circle" size={14} color={colors.success} />
-                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Fertig!</Text>
+              <View style={[styles.statusBadgeIcon, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="document-text" size={16} color={colors.success} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={12}
+                  color={colors.success}
+                  style={styles.badgeCheckmarkOverlay}
+                />
               </View>
             )}
             {recording.summary?.status === 'processing' && (
-              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
-                <ActivityIndicator size="small" color={colors.success} style={styles.badgeSpinner} />
-                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Zus.</Text>
+              <View style={[styles.statusBadgeIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="sparkles" size={16} color={colors.primary} />
+                <ActivityIndicator
+                  size="small"
+                  color={colors.primary}
+                  style={styles.badgeSpinnerOverlay}
+                />
               </View>
             )}
             {showCompletedBadge.summary && (
-              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
-                <Ionicons name="checkmark-circle" size={14} color={colors.success} />
-                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Fertig!</Text>
+              <View style={[styles.statusBadgeIcon, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="sparkles" size={16} color={colors.success} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={12}
+                  color={colors.success}
+                  style={styles.badgeCheckmarkOverlay}
+                />
               </View>
             )}
           </View>
@@ -514,20 +532,24 @@ const styles = StyleSheet.create({
     height: 1,
     marginHorizontal: 16,
   },
-  statusBadgeCompact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  statusBadgeIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     marginLeft: 8,
-    gap: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
-  badgeSpinner: {
-    transform: [{ scale: 0.7 }],
+  badgeSpinnerOverlay: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+    transform: [{ scale: 0.6 }],
   },
-  statusBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
+  badgeCheckmarkOverlay: {
+    position: 'absolute',
+    right: -1,
+    top: -1,
   },
 });
