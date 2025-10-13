@@ -166,26 +166,6 @@ export default function TranscriptScreen({ route, navigation }: Props) {
           </View>
         )}
 
-        {/* Future AI Prompts Section */}
-        <View style={[styles.futureSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles.futureSectionHeader}>
-            <Ionicons name="bulb-outline" size={20} color={colors.textSecondary} />
-            <Text style={[styles.futureSectionTitle, { color: colors.textSecondary }]}>
-              Demnächst: AI-Funktionen
-            </Text>
-          </View>
-          <View style={styles.futurePlaceholder}>
-            <Text style={[styles.futurePlaceholderText, { color: colors.textSecondary }]}>
-              • Zusammenfassen
-            </Text>
-            <Text style={[styles.futurePlaceholderText, { color: colors.textSecondary }]}>
-              • Aufgaben extrahieren
-            </Text>
-            <Text style={[styles.futurePlaceholderText, { color: colors.textSecondary }]}>
-              • Notizen erstellen
-            </Text>
-          </View>
-        </View>
       </ScrollView>
     </View>
   );
@@ -336,27 +316,5 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  futureSection: {
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-  },
-  futureSectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
-  },
-  futureSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  futurePlaceholder: {
-    gap: 8,
-  },
-  futurePlaceholderText: {
-    fontSize: 14,
   },
 });
