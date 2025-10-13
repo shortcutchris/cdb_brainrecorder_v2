@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View, Image, Text, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
@@ -14,6 +14,19 @@ import RecordingScreen from './screens/RecordingScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function HeaderTitle({ title, color }: { title: string; color: string }) {
+  return (
+    <View style={styles.headerTitleContainer}>
+      <Image
+        source={require('./assets/logo.png')}
+        style={styles.headerLogo}
+        resizeMode="contain"
+      />
+      <Text style={[styles.headerTitleText, { color }]}>{title}</Text>
+    </View>
+  );
+}
 
 function AppNavigator() {
   const { colors, isDark } = useTheme();
@@ -53,7 +66,9 @@ function AppNavigator() {
           name="Home"
           component={HomeScreen}
           options={({ navigation }) => ({
-            title: 'CDB BrainRecorder',
+            headerTitle: () => (
+              <HeaderTitle title="CDB BrainRecorder" color={colors.text} />
+            ),
             headerBackTitle: ' ',
             headerRight: () => (
               <TouchableOpacity
@@ -104,3 +119,19 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerLogo: {
+    width: 32,
+    height: 32,
+  },
+  headerTitleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
