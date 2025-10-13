@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { Recording } from '../types';
 import { formatDate, formatDuration } from '../utils/audio';
@@ -54,24 +55,24 @@ export default function RecordingItem({
 
   return (
     <>
-      <View className="bg-surface rounded-xl p-4 mb-3 mx-4 shadow-sm">
+      <View style={styles.container}>
         {/* Title */}
-        <Text className="text-lg font-semibold text-text-primary mb-1">
+        <Text style={styles.title}>
           🎙️ {recording.name}
         </Text>
 
         {/* Metadata */}
-        <Text className="text-sm text-text-secondary mb-3">
+        <Text style={styles.metadata}>
           {formatDate(recording.createdAt)} • {formatDuration(recording.duration)}
         </Text>
 
         {/* Action Buttons */}
-        <View className="flex-row justify-start space-x-3">
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => onPlay(recording.id)}
-            className="bg-primary rounded-lg px-4 py-2"
+            style={styles.playButton}
           >
-            <Text className="text-white font-semibold">▶️ Play</Text>
+            <Text style={styles.buttonText}>▶️ Play</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -79,16 +80,16 @@ export default function RecordingItem({
               setNewName(recording.name);
               setShowRenameModal(true);
             }}
-            className="bg-secondary rounded-lg px-4 py-2"
+            style={styles.renameButton}
           >
-            <Text className="text-white font-semibold">✏️ Umbenennen</Text>
+            <Text style={styles.buttonText}>✏️ Umbenennen</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleDelete}
-            className="bg-danger rounded-lg px-4 py-2"
+            style={styles.deleteButton}
           >
-            <Text className="text-white font-semibold">🗑️ Löschen</Text>
+            <Text style={styles.buttonText}>🗑️ Löschen</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -101,16 +102,16 @@ export default function RecordingItem({
         onRequestClose={() => setShowRenameModal(false)}
       >
         <Pressable
-          className="flex-1 bg-black/50 justify-end"
+          style={styles.modalOverlay}
           onPress={() => setShowRenameModal(false)}
         >
           <Pressable
-            className="bg-surface rounded-t-3xl p-6"
+            style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <View className="w-12 h-1 bg-border rounded-full self-center mb-4" />
+            <View style={styles.modalHandle} />
 
-            <Text className="text-xl font-bold text-text-primary mb-4">
+            <Text style={styles.modalTitle}>
               Umbenennen
             </Text>
 
@@ -118,24 +119,24 @@ export default function RecordingItem({
               value={newName}
               onChangeText={setNewName}
               placeholder="Name der Aufnahme"
-              className="border border-border rounded-lg p-3 mb-4 text-base"
+              style={styles.textInput}
               autoFocus
               onSubmitEditing={handleRename}
             />
 
-            <View className="flex-row justify-end space-x-3">
+            <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 onPress={() => setShowRenameModal(false)}
-                className="px-6 py-3"
+                style={styles.cancelButton}
               >
-                <Text className="text-secondary font-semibold">Abbrechen</Text>
+                <Text style={styles.cancelButtonText}>Abbrechen</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleRename}
-                className="bg-primary rounded-lg px-6 py-3"
+                style={styles.saveButton}
               >
-                <Text className="text-white font-semibold">Speichern</Text>
+                <Text style={styles.buttonText}>Speichern</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -144,3 +145,108 @@ export default function RecordingItem({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 4,
+  },
+  metadata: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 12,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 12,
+  },
+  playButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  renameButton: {
+    backgroundColor: '#64748B',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  modalHandle: {
+    width: 48,
+    height: 4,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  cancelButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  cancelButtonText: {
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+});

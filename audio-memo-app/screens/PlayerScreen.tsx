@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
@@ -129,33 +130,33 @@ export default function PlayerScreen({ route, navigation }: Props) {
 
   if (!recording) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-text-secondary">Aufnahme nicht gefunden</Text>
+      <View style={styles.notFoundContainer}>
+        <Text style={styles.notFoundText}>Aufnahme nicht gefunden</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       {/* Main Content */}
-      <View className="flex-1 items-center justify-center px-8">
+      <View style={styles.content}>
         {/* Icon */}
-        <View className="bg-primary/10 rounded-full w-32 h-32 items-center justify-center mb-8">
-          <Text className="text-6xl">🎙️</Text>
+        <View style={styles.iconContainer}>
+          <Text style={styles.icon}>🎙️</Text>
         </View>
 
         {/* Title */}
-        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">
+        <Text style={styles.title}>
           {recording.name}
         </Text>
 
         {/* Date */}
-        <Text className="text-base text-text-secondary mb-12">
+        <Text style={styles.date}>
           {formatDate(recording.createdAt)}
         </Text>
 
         {/* Seekbar */}
-        <View className="w-full mb-4">
+        <View style={styles.seekbarContainer}>
           <Slider
             style={{ width: '100%', height: 40 }}
             minimumValue={0}
@@ -166,56 +167,56 @@ export default function PlayerScreen({ route, navigation }: Props) {
             maximumTrackTintColor="#E2E8F0"
             thumbTintColor="#3B82F6"
           />
-          <View className="flex-row justify-between px-2">
-            <Text className="text-text-secondary">{formatDuration(position)}</Text>
-            <Text className="text-text-secondary">{formatDuration(duration)}</Text>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{formatDuration(position)}</Text>
+            <Text style={styles.timeText}>{formatDuration(duration)}</Text>
           </View>
         </View>
 
         {/* Player Controls */}
-        <View className="flex-row items-center justify-center space-x-6 mb-12">
+        <View style={styles.controlsContainer}>
           <TouchableOpacity
             onPress={() => handleSkip(-15)}
-            className="bg-surface rounded-full w-14 h-14 items-center justify-center shadow-sm"
+            style={styles.skipButton}
           >
-            <Text className="text-2xl">⏮</Text>
+            <Text style={styles.skipButtonText}>⏮</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handlePlayPause}
-            className="bg-primary rounded-full w-20 h-20 items-center justify-center shadow-lg"
+            style={styles.playPauseButton}
           >
-            <Text className="text-4xl">{isPlaying ? '⏸' : '▶️'}</Text>
+            <Text style={styles.playPauseButtonText}>{isPlaying ? '⏸' : '▶️'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => handleSkip(15)}
-            className="bg-surface rounded-full w-14 h-14 items-center justify-center shadow-sm"
+            style={styles.skipButton}
           >
-            <Text className="text-2xl">⏭</Text>
+            <Text style={styles.skipButtonText}>⏭</Text>
           </TouchableOpacity>
         </View>
 
         {/* Action Buttons */}
-        <View className="flex-row justify-center space-x-8">
+        <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             onPress={() => {
               setNewName(recording.name);
               setShowRenameModal(true);
             }}
-            className="items-center"
+            style={styles.actionButton}
           >
-            <View className="bg-surface rounded-full w-12 h-12 items-center justify-center shadow-sm mb-2">
-              <Text className="text-2xl">✏️</Text>
+            <View style={styles.actionButtonIcon}>
+              <Text style={styles.actionButtonIconText}>✏️</Text>
             </View>
-            <Text className="text-xs text-text-secondary">Umbenennen</Text>
+            <Text style={styles.actionButtonLabel}>Umbenennen</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleDelete} className="items-center">
-            <View className="bg-surface rounded-full w-12 h-12 items-center justify-center shadow-sm mb-2">
-              <Text className="text-2xl">🗑️</Text>
+          <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
+            <View style={styles.actionButtonIcon}>
+              <Text style={styles.actionButtonIconText}>🗑️</Text>
             </View>
-            <Text className="text-xs text-text-secondary">Löschen</Text>
+            <Text style={styles.actionButtonLabel}>Löschen</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -228,16 +229,16 @@ export default function PlayerScreen({ route, navigation }: Props) {
         onRequestClose={() => setShowRenameModal(false)}
       >
         <Pressable
-          className="flex-1 bg-black/50 justify-end"
+          style={styles.modalOverlay}
           onPress={() => setShowRenameModal(false)}
         >
           <Pressable
-            className="bg-surface rounded-t-3xl p-6"
+            style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
           >
-            <View className="w-12 h-1 bg-border rounded-full self-center mb-4" />
+            <View style={styles.modalHandle} />
 
-            <Text className="text-xl font-bold text-text-primary mb-4">
+            <Text style={styles.modalTitle}>
               Umbenennen
             </Text>
 
@@ -245,24 +246,24 @@ export default function PlayerScreen({ route, navigation }: Props) {
               value={newName}
               onChangeText={setNewName}
               placeholder="Name der Aufnahme"
-              className="border border-border rounded-lg p-3 mb-4 text-base"
+              style={styles.textInput}
               autoFocus
               onSubmitEditing={handleRename}
             />
 
-            <View className="flex-row justify-end space-x-3">
+            <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 onPress={() => setShowRenameModal(false)}
-                className="px-6 py-3"
+                style={styles.cancelButton}
               >
-                <Text className="text-secondary font-semibold">Abbrechen</Text>
+                <Text style={styles.cancelButtonText}>Abbrechen</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleRename}
-                className="bg-primary rounded-lg px-6 py-3"
+                style={styles.saveButton}
               >
-                <Text className="text-white font-semibold">Speichern</Text>
+                <Text style={styles.buttonText}>Speichern</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -271,3 +272,185 @@ export default function PlayerScreen({ route, navigation }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  notFoundContainer: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notFoundText: {
+    color: '#64748B',
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  iconContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 64,
+    width: 128,
+    height: 128,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+  },
+  icon: {
+    fontSize: 64,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  date: {
+    fontSize: 16,
+    color: '#64748B',
+    marginBottom: 48,
+  },
+  seekbarContainer: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  timeText: {
+    color: '#64748B',
+  },
+  controlsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    marginBottom: 48,
+  },
+  skipButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  skipButtonText: {
+    fontSize: 24,
+  },
+  playPauseButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 40,
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  playPauseButtonText: {
+    fontSize: 36,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 32,
+  },
+  actionButton: {
+    alignItems: 'center',
+  },
+  actionButtonIcon: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 8,
+  },
+  actionButtonIconText: {
+    fontSize: 24,
+  },
+  actionButtonLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  modalHandle: {
+    width: 48,
+    height: 4,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 16,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  cancelButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  cancelButtonText: {
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+});

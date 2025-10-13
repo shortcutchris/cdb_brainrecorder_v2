@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Recording } from '../types';
 
 const STORAGE_KEY = '@audio_memo_recordings';
@@ -11,41 +11,6 @@ const STORAGE_KEY = '@audio_memo_recordings';
 export function useRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
-
-  /**
-   * Load all recordings from AsyncStorage on mount
-   * Validates that files still exist in file system
-   */
-  useEffect(() => {
-    loadRecordings();
-  }, []);
-
-  /**
-   * Load recordings from AsyncStorage
-   */
-  const loadRecordings = async () => {
-    try {
-      setLoading(true);
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-
-      if (stored) {
-        const parsed: Recording[] = JSON.parse(stored);
-
-        // Validate that files still exist
-        const validated = await validateRecordings(parsed);
-        setRecordings(validated);
-
-        // If some files were removed, update storage
-        if (validated.length !== parsed.length) {
-          await saveToStorage(validated);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading recordings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * Validate that recording files still exist in file system
@@ -76,6 +41,44 @@ export function useRecordings() {
       throw error;
     }
   };
+
+  /**
+   * Load recordings from AsyncStorage
+   */
+  const loadRecordings = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+
+      if (stored) {
+        const parsed: Recording[] = JSON.parse(stored);
+
+        // Validate that files still exist
+        const validated = await validateRecordings(parsed);
+        setRecordings(validated);
+
+        // If some files were removed, update storage
+        if (validated.length !== parsed.length) {
+          await saveToStorage(validated);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading recordings:', error);
+    } finally {
+      if (showLoading) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  /**
+   * Load all recordings from AsyncStorage on mount
+   */
+  useEffect(() => {
+    loadRecordings();
+  }, [loadRecordings]);
 
   /**
    * Add a new recording

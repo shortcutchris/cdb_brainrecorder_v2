@@ -1,5 +1,4 @@
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
 import { Recording } from '../types';
 
 /**
@@ -65,21 +64,16 @@ export async function stopRecording(
     const status = await recording.getStatusAsync();
     const duration = status.isLoaded ? status.durationMillis / 1000 : 0;
 
-    // Generate unique ID and filename
+    // Generate unique ID
     const id = Date.now().toString();
-    const filename = `recording-${id}.m4a`;
-    const newUri = `${FileSystem.documentDirectory}${filename}`;
 
-    // Move file to document directory
-    await FileSystem.moveAsync({
-      from: uri,
-      to: newUri,
-    });
+    // Use the URI directly (no need to move file)
+    // The recording is already saved by expo-av in a permanent location
 
     // Create recording metadata
     const newRecording: Recording = {
       id,
-      uri: newUri,
+      uri: uri, // Use original URI
       name: formatDefaultName(),
       createdAt: new Date().toISOString(),
       duration: Math.round(duration),

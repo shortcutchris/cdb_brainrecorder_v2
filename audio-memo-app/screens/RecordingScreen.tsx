@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import { RootStackParamList } from '../types';
@@ -85,40 +85,42 @@ export default function RecordingScreen({ navigation }: Props) {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       {/* Header with Close Button */}
-      <View className="absolute top-0 left-0 right-0 pt-12 pb-4 px-6 z-10">
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel}>
-          <Text className="text-2xl">✕</Text>
+          <Text style={styles.closeButton}>✕</Text>
         </TouchableOpacity>
       </View>
 
       {/* Main Content */}
-      <View className="flex-1 items-center justify-center px-8">
+      <View style={styles.content}>
         {/* Recording Indicator */}
-        <View className="items-center mb-8">
+        <View style={styles.indicatorContainer}>
           <View
-            className="w-4 h-4 bg-danger rounded-full mb-2"
-            style={{
-              shadowColor: '#EF4444',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.6,
-              shadowRadius: 8,
-            }}
+            style={[
+              styles.recordingDot,
+              {
+                shadowColor: '#EF4444',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.6,
+                shadowRadius: 8,
+              },
+            ]}
           />
-          <Text className="text-danger text-lg font-semibold">● REC</Text>
+          <Text style={styles.recordingText}>● REC</Text>
         </View>
 
         {/* Timer */}
-        <View className="bg-surface rounded-2xl p-8 mb-12 shadow-sm">
-          <Text className="text-5xl font-bold text-text-primary text-center">
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>
             {formatDuration(duration)}
           </Text>
         </View>
 
         {/* Waveform Placeholder (Phase 2) */}
-        <View className="h-16 mb-12 opacity-30">
-          <Text className="text-text-secondary text-center">
+        <View style={styles.waveformPlaceholder}>
+          <Text style={styles.waveformText}>
             ▓▓░░▓▓▓░░▓░▓▓
           </Text>
         </View>
@@ -126,22 +128,110 @@ export default function RecordingScreen({ navigation }: Props) {
         {/* Stop Button */}
         <TouchableOpacity
           onPress={handleStop}
-          className="bg-danger rounded-xl px-12 py-4 shadow-lg"
-          style={{
-            shadowColor: '#EF4444',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-          }}
+          style={[
+            styles.stopButton,
+            {
+              shadowColor: '#EF4444',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+            },
+          ]}
         >
-          <Text className="text-white text-xl font-bold">⏹ Stopp</Text>
+          <Text style={styles.stopButtonText}>⏹ Stopp</Text>
         </TouchableOpacity>
 
         {/* Helper Text */}
-        <Text className="text-text-secondary text-sm mt-6 text-center">
+        <Text style={styles.helperText}>
           Zum Speichern stoppen
         </Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 24,
+    zIndex: 10,
+  },
+  closeButton: {
+    fontSize: 24,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  indicatorContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  recordingDot: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#EF4444',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  recordingText: {
+    color: '#EF4444',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  timerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 32,
+    marginBottom: 48,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  timerText: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: '#1E293B',
+    textAlign: 'center',
+  },
+  waveformPlaceholder: {
+    height: 64,
+    marginBottom: 48,
+    opacity: 0.3,
+  },
+  waveformText: {
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  stopButton: {
+    backgroundColor: '#EF4444',
+    borderRadius: 12,
+    paddingHorizontal: 48,
+    paddingVertical: 16,
+    elevation: 8,
+  },
+  stopButtonText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  helperText: {
+    color: '#64748B',
+    fontSize: 14,
+    marginTop: 24,
+    textAlign: 'center',
+  },
+});
