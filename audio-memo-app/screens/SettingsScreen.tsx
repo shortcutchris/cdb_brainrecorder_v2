@@ -16,7 +16,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const { themeMode, colors, setThemeMode, isDark } = useTheme();
-  const { autoTranscribeEnabled, setAutoTranscribeEnabled } = useSettings();
+  const { autoTranscribeEnabled, setAutoTranscribeEnabled, autoSummaryEnabled, setAutoSummaryEnabled } = useSettings();
 
   const handleThemeChange = async (mode: 'auto' | 'light' | 'dark') => {
     await setThemeMode(mode);
@@ -136,6 +136,29 @@ export default function SettingsScreen({ navigation }: Props) {
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
                     Nach Aufnahme automatisch transkribieren
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+            <TouchableOpacity
+              style={styles.option}
+              onPress={() => setAutoSummaryEnabled(!autoSummaryEnabled)}
+            >
+              <View style={styles.optionLeft}>
+                <View style={[styles.checkbox, { borderColor: colors.border, backgroundColor: autoSummaryEnabled ? colors.primary : 'transparent' }]}>
+                  {autoSummaryEnabled && (
+                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.optionText, { color: colors.text }]}>
+                    Automatische Zusammenfassung
+                  </Text>
+                  <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                    Erstellt automatisch eine Zusammenfassung nach Transkription
                   </Text>
                 </View>
               </View>

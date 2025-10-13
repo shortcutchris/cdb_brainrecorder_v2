@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { Recording } from '../types';
 import { transcribeAudio } from '../services/transcriptionService';
 import { generateSummary, executeCustomPrompt } from '../services/aiService';
+import { useSettings } from '../contexts/SettingsContext';
 
 const STORAGE_KEY = '@audio_memo_recordings';
 
@@ -13,6 +14,7 @@ const STORAGE_KEY = '@audio_memo_recordings';
 export function useRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
+  const { autoSummaryEnabled } = useSettings();
 
   /**
    * Validate that recording files still exist in file system
@@ -237,6 +239,18 @@ export function useRecordings() {
       );
       setRecordings(updatedWithTranscript);
       await saveToStorage(updatedWithTranscript);
+
+      // Auto-summary: If enabled, automatically generate summary after successful transcription
+      if (autoSummaryEnabled) {
+        const updatedRecording = updatedWithTranscript.find(r => r.id === id);
+        // Only trigger if summary doesn't exist or has error status
+        if (updatedRecording && (!updatedRecording.summary || updatedRecording.summary.status === 'error')) {
+          // Fire-and-forget: don't await, catch errors silently
+          generateRecordingSummary(id).catch(error => {
+            console.error('Auto-summary failed (silent):', error);
+          });
+        }
+      }
 
       return true;
     } catch (error: any) {
