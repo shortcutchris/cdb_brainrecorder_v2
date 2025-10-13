@@ -283,8 +283,10 @@ export function useRecordings() {
 
   /**
    * Generate AI summary for a recording
+   * @param id Recording ID
+   * @param language Target language for the summary (default: 'de')
    */
-  const generateRecordingSummary = useCallback(async (id: string) => {
+  const generateRecordingSummary = useCallback(async (id: string, language: string = 'de') => {
     try {
       // Load from AsyncStorage to get latest state
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
@@ -316,7 +318,7 @@ export function useRecordings() {
       await saveToStorage(updatedWithProcessing);
 
       // Call AI service
-      const result = await generateSummary(recording.transcript.text);
+      const result = await generateSummary(recording.transcript.text, language as any);
 
       // Reload to get latest state
       const stored2 = await AsyncStorage.getItem(STORAGE_KEY);
@@ -369,8 +371,11 @@ export function useRecordings() {
 
   /**
    * Execute custom prompt on a recording
+   * @param id Recording ID
+   * @param prompt Custom prompt text
+   * @param language Target language for the response (default: 'de')
    */
-  const executeRecordingPrompt = useCallback(async (id: string, prompt: string) => {
+  const executeRecordingPrompt = useCallback(async (id: string, prompt: string, language: string = 'de') => {
     try {
       // Load from AsyncStorage to get latest state
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
@@ -406,7 +411,7 @@ export function useRecordings() {
       await saveToStorage(updatedWithProcessing);
 
       // Call AI service
-      const result = await executeCustomPrompt(recording.transcript.text, prompt);
+      const result = await executeCustomPrompt(recording.transcript.text, prompt, language as any);
 
       // Reload to get latest state
       const stored2 = await AsyncStorage.getItem(STORAGE_KEY);

@@ -1,4 +1,5 @@
 import { OPENAI_API_KEY } from '../config/env';
+import type { Language } from '../contexts/SettingsContext';
 
 /**
  * AI Service
@@ -8,6 +9,18 @@ import { OPENAI_API_KEY } from '../config/env';
 const OPENAI_CHAT_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o-mini'; // Cost-effective model for text processing
 
+// Language name mapping for prompts
+const LANGUAGE_NAMES: Record<Language, string> = {
+  de: 'German',
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  it: 'Italian',
+  pl: 'Polish',
+  pt: 'Portuguese',
+  ja: 'Japanese',
+};
+
 export interface AiServiceResult {
   text: string;
 }
@@ -15,11 +28,13 @@ export interface AiServiceResult {
 /**
  * Generate a summary of the transcribed text
  * @param transcriptText The transcribed text to summarize
+ * @param language Target language for the summary (default: 'de')
  * @returns Summary text
  * @throws Error if API call fails
  */
 export async function generateSummary(
-  transcriptText: string
+  transcriptText: string,
+  language: Language = 'de'
 ): Promise<AiServiceResult> {
   if (!OPENAI_API_KEY) {
     throw new Error('OpenAI API Key nicht konfiguriert.');
@@ -29,13 +44,16 @@ export async function generateSummary(
     throw new Error('Kein Transkript-Text vorhanden.');
   }
 
-  try {
-    const systemPrompt = `Du bist ein hilfreicher Assistent, der Zusammenfassungen von Audio-Transkripten erstellt.
-Erstelle eine prägnante, strukturierte Zusammenfassung des folgenden Transkripts.
-Verwende Stichpunkte (•) für bessere Lesbarkeit.
-Konzentriere dich auf die Hauptpunkte und wichtige Details.`;
+  const languageName = LANGUAGE_NAMES[language];
 
-    const userPrompt = `Erstelle eine Zusammenfassung dieses Transkripts:\n\n${transcriptText}`;
+  try {
+    const systemPrompt = `You are a helpful assistant that creates summaries of audio transcripts.
+Create a concise, structured summary of the following transcript.
+Use bullet points (•) for better readability.
+Focus on main points and important details.
+IMPORTANT: Respond in ${languageName}.`;
+
+    const userPrompt = `Create a summary of this transcript:\n\n${transcriptText}`;
 
     const response = await fetch(OPENAI_CHAT_API_URL, {
       method: 'POST',
@@ -93,12 +111,14 @@ Konzentriere dich auf die Hauptpunkte und wichtige Details.`;
  * Execute a custom prompt on the transcribed text
  * @param transcriptText The transcribed text
  * @param customPrompt User's custom prompt/instruction
+ * @param language Target language for the response (default: 'de')
  * @returns AI response
  * @throws Error if API call fails
  */
 export async function executeCustomPrompt(
   transcriptText: string,
-  customPrompt: string
+  customPrompt: string,
+  language: Language = 'de'
 ): Promise<AiServiceResult> {
   if (!OPENAI_API_KEY) {
     throw new Error('OpenAI API Key nicht konfiguriert.');
@@ -112,12 +132,15 @@ export async function executeCustomPrompt(
     throw new Error('Kein Prompt eingegeben.');
   }
 
-  try {
-    const systemPrompt = `Du bist ein hilfreicher Assistent, der Audio-Transkripte analysiert und bearbeitet.
-Führe die Anweisungen des Benutzers präzise aus.
-Antworte auf Deutsch und strukturiere die Ausgabe übersichtlich.`;
+  const languageName = LANGUAGE_NAMES[language];
 
-    const userPrompt = `Transkript:\n${transcriptText}\n\nAnweisung: ${customPrompt}`;
+  try {
+    const systemPrompt = `You are a helpful assistant that analyzes and processes audio transcripts.
+Execute the user's instructions precisely.
+Structure the output clearly and professionally.
+IMPORTANT: Respond in ${languageName}.`;
+
+    const userPrompt = `Transcript:\n${transcriptText}\n\nInstruction: ${customPrompt}`;
 
     const response = await fetch(OPENAI_CHAT_API_URL, {
       method: 'POST',

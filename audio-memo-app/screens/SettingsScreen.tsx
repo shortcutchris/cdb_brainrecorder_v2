@@ -1,26 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { useSettings } from '../contexts/SettingsContext';
+import { useSettings, LANGUAGES } from '../contexts/SettingsContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const { themeMode, colors, setThemeMode, isDark } = useTheme();
-  const { autoTranscribeEnabled, setAutoTranscribeEnabled, autoSummaryEnabled, setAutoSummaryEnabled } = useSettings();
+  const { autoTranscribeEnabled, setAutoTranscribeEnabled, autoSummaryEnabled, setAutoSummaryEnabled, defaultLanguage, setDefaultLanguage } = useSettings();
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const handleThemeChange = async (mode: 'auto' | 'light' | 'dark') => {
     await setThemeMode(mode);
   };
+
+  const selectedLanguage = LANGUAGES.find(lang => lang.code === defaultLanguage) || LANGUAGES[0];
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -166,6 +171,40 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* Language Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="globe-outline" size={20} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Sprache
+            </Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TouchableOpacity
+              style={styles.option}
+              onPress={() => setShowLanguageModal(true)}
+            >
+              <View style={styles.optionLeft}>
+                <View>
+                  <Text style={[styles.optionText, { color: colors.text }]}>
+                    AI-Standardsprache
+                  </Text>
+                  <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                    Gilt für alle AI-Funktionen
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.languageDisplay}>
+                <Text style={[styles.languageText, { color: colors.text }]}>
+                  {selectedLanguage.flag} {selectedLanguage.name}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* App Info Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -220,6 +259,49 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
       </View>
+
+      {/* Language Modal */}
+      <Modal
+        visible={showLanguageModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLanguageModal(false)}
+        >
+          <Pressable
+            style={[styles.modalContent, { backgroundColor: colors.card }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Sprache wählen</Text>
+
+            <View style={styles.languageList}>
+              {LANGUAGES.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
+                  style={[
+                    styles.languageOption,
+                    defaultLanguage === language.code && { backgroundColor: colors.primary + '10' }
+                  ]}
+                  onPress={() => {
+                    setDefaultLanguage(language.code);
+                    setShowLanguageModal(false);
+                  }}
+                >
+                  <Text style={[styles.languageOptionText, { color: colors.text }]}>
+                    {language.flag} {language.name}
+                  </Text>
+                  {defaultLanguage === language.code && (
+                    <Ionicons name="checkmark" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 }
@@ -327,6 +409,52 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 13,
+    fontWeight: '500',
+  },
+  languageDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  languageText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  languageList: {
+    gap: 8,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 8,
+  },
+  languageOptionText: {
+    fontSize: 16,
     fontWeight: '500',
   },
 });

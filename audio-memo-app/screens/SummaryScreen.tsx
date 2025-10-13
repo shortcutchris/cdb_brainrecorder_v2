@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Modal,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,6 +17,7 @@ import * as Clipboard from 'expo-clipboard';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSettings, LANGUAGES, type Language } from '../contexts/SettingsContext';
 import { formatDate, formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Summary'>;
@@ -23,8 +26,13 @@ export default function SummaryScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
   const { getRecording, generateRecordingSummary, refresh } = useRecordings();
   const { colors } = useTheme();
+  const { defaultLanguage } = useSettings();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(defaultLanguage);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  const selectedLang = LANGUAGES.find(lang => lang.code === selectedLanguage) || LANGUAGES[0];
 
   // Refresh data when screen is focused
   useFocusEffect(
@@ -68,7 +76,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
 
     setIsGenerating(true);
     try {
-      await generateRecordingSummary(recordingId);
+      await generateRecordingSummary(recordingId, selectedLanguage);
     } catch (error: any) {
       Alert.alert(
         'Fehler',
@@ -180,6 +188,22 @@ export default function SummaryScreen({ route, navigation }: Props) {
               </Text>
             </View>
 
+            {/* Language Selector */}
+            <View style={styles.languageSection}>
+              <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
+                Sprache:
+              </Text>
+              <TouchableOpacity
+                style={[styles.languageSelector, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => setShowLanguageModal(true)}
+              >
+                <Text style={[styles.languageSelectorText, { color: colors.text }]}>
+                  {selectedLang.flag} {selectedLang.name}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
             {/* Action Buttons */}
             <View style={styles.actionButtons}>
               <TouchableOpacity
@@ -202,6 +226,49 @@ export default function SummaryScreen({ route, navigation }: Props) {
           </>
         )}
       </View>
+
+      {/* Language Modal */}
+      <Modal
+        visible={showLanguageModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowLanguageModal(false)}
+        >
+          <Pressable
+            style={[styles.modalContent, { backgroundColor: colors.card }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Sprache wählen</Text>
+
+            <View style={styles.languageList}>
+              {LANGUAGES.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
+                  style={[
+                    styles.languageOption,
+                    selectedLanguage === language.code && { backgroundColor: colors.primary + '10' }
+                  ]}
+                  onPress={() => {
+                    setSelectedLanguage(language.code);
+                    setShowLanguageModal(false);
+                  }}
+                >
+                  <Text style={[styles.languageOptionText, { color: colors.text }]}>
+                    {language.flag} {language.name}
+                  </Text>
+                  {selectedLanguage === language.code && (
+                    <Ionicons name="checkmark" size={24} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 }
@@ -355,5 +422,63 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  languageSection: {
+    marginBottom: 16,
+  },
+  languageLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  languageSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  languageSelectorText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  languageList: {
+    gap: 8,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 8,
+  },
+  languageOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

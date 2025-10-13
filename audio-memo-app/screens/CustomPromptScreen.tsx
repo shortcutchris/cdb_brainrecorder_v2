@@ -7,6 +7,8 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Modal,
+  Pressable,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +20,7 @@ import * as Clipboard from 'expo-clipboard';
 import { RootStackParamList, AiResult } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSettings, LANGUAGES, type Language } from '../contexts/SettingsContext';
 import { formatDate, formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomPrompt'>;
@@ -26,9 +29,14 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
   const { getRecording, executeRecordingPrompt, refresh } = useRecordings();
   const { colors } = useTheme();
+  const { defaultLanguage } = useSettings();
   const [prompt, setPrompt] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(defaultLanguage);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  const selectedLang = LANGUAGES.find(lang => lang.code === selectedLanguage) || LANGUAGES[0];
 
   // Refresh data when screen is focused
   useFocusEffect(
@@ -77,7 +85,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
 
     setIsExecuting(true);
     try {
-      await executeRecordingPrompt(recordingId, prompt.trim());
+      await executeRecordingPrompt(recordingId, prompt.trim(), selectedLanguage);
       setPrompt(''); // Clear input after successful execution
     } catch (error: any) {
       Alert.alert(
@@ -156,6 +164,22 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
 
         {/* Prompt Input */}
         <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          {/* Language Selector */}
+          <View style={styles.languageSection}>
+            <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
+              Sprache:
+            </Text>
+            <TouchableOpacity
+              style={[styles.languageSelector, { backgroundColor: colors.background, borderColor: colors.border }]}
+              onPress={() => setShowLanguageModal(true)}
+            >
+              <Text style={[styles.languageSelectorText, { color: colors.text }]}>
+                {selectedLang.flag} {selectedLang.name}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
           <TextInput
             value={prompt}
             onChangeText={setPrompt}
@@ -184,6 +208,49 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Language Modal */}
+        <Modal
+          visible={showLanguageModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowLanguageModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowLanguageModal(false)}
+          >
+            <Pressable
+              style={[styles.modalContent, { backgroundColor: colors.card }]}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Sprache wählen</Text>
+
+              <View style={styles.languageList}>
+                {LANGUAGES.map((language) => (
+                  <TouchableOpacity
+                    key={language.code}
+                    style={[
+                      styles.languageOption,
+                      selectedLanguage === language.code && { backgroundColor: colors.primary + '10' }
+                    ]}
+                    onPress={() => {
+                      setSelectedLanguage(language.code);
+                      setShowLanguageModal(false);
+                    }}
+                  >
+                    <Text style={[styles.languageOptionText, { color: colors.text }]}>
+                      {language.flag} {language.name}
+                    </Text>
+                    {selectedLanguage === language.code && (
+                      <Ionicons name="checkmark" size={24} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </View>
     </KeyboardAvoidingView>
   );
@@ -391,5 +458,65 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  languageSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  languageSelector: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  languageSelectorText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  languageList: {
+    gap: 8,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 8,
+  },
+  languageOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
