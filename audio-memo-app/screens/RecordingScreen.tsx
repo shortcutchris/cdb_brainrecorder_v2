@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
@@ -186,6 +186,8 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '700',
     textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   stopButton: {
     flexDirection: 'row',

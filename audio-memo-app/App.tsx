@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,8 +18,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function AppNavigator() {
   const { colors, isDark } = useTheme();
 
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.primary,
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack.Navigator
         initialRouteName="Home"
@@ -32,6 +45,8 @@ function AppNavigator() {
             fontWeight: 'bold',
           },
           headerShadowVisible: true,
+          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
         }}
       >
         <Stack.Screen
@@ -39,6 +54,7 @@ function AppNavigator() {
           component={HomeScreen}
           options={({ navigation }) => ({
             title: 'CDB BrainRecorder',
+            headerBackTitle: ' ',
             headerRight: () => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('Settings')}
@@ -55,6 +71,7 @@ function AppNavigator() {
           options={{
             title: '',
             presentation: 'card',
+            headerBackTitle: '',
           }}
         />
         <Stack.Screen
@@ -72,6 +89,7 @@ function AppNavigator() {
           options={{
             title: 'Einstellungen',
             presentation: 'card',
+            headerBackTitle: '',
           }}
         />
       </Stack.Navigator>
