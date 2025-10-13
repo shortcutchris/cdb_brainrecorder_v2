@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Recording } from '../types';
+import { transcribeAudio } from '../services/transcriptionService';
 
 const STORAGE_KEY = '@audio_memo_recordings';
 
@@ -19,11 +20,15 @@ export function useRecordings() {
     const validated: Recording[] = [];
 
     for (const rec of recs) {
-      const fileInfo = await FileSystem.getInfoAsync(rec.uri);
-      if (fileInfo.exists) {
-        validated.push(rec);
-      } else {
-        console.warn(`File not found: ${rec.uri}`);
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(rec.uri);
+        if (fileInfo.exists) {
+          validated.push(rec);
+        } else {
+          console.warn(`File not found: ${rec.uri}`);
+        }
+      } catch (error) {
+        console.warn(`Error checking file: ${rec.uri}`, error);
       }
     }
 
@@ -121,7 +126,12 @@ export function useRecordings() {
       if (!recording) return false;
 
       // Delete file from file system
-      await FileSystem.deleteAsync(recording.uri, { idempotent: true });
+      try {
+        await FileSystem.deleteAsync(recording.uri, { idempotent: true });
+      } catch (fileError) {
+        console.warn('Error deleting file:', fileError);
+        // Continue anyway to remove from state
+      }
 
       // Remove from state and storage
       const updated = recordings.filter(r => r.id !== id);
@@ -142,6 +152,76 @@ export function useRecordings() {
     return recordings.find(r => r.id === id);
   }, [recordings]);
 
+  /**
+   * Transcribe a recording using OpenAI Whisper API
+   */
+  const transcribeRecording = useCallback(async (id: string) => {
+    try {
+      const recording = recordings.find(r => r.id === id);
+      if (!recording) {
+        throw new Error('Aufnahme nicht gefunden');
+      }
+
+      // Set status to processing
+      const updatedWithProcessing = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              transcript: {
+                text: '',
+                status: 'processing' as const,
+                createdAt: new Date().toISOString(),
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithProcessing);
+      await saveToStorage(updatedWithProcessing);
+
+      // Call transcription service
+      const result = await transcribeAudio(recording.uri);
+
+      // Update with completed transcript
+      const updatedWithTranscript = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              transcript: {
+                text: result.text,
+                status: 'completed' as const,
+                createdAt: new Date().toISOString(),
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithTranscript);
+      await saveToStorage(updatedWithTranscript);
+
+      return true;
+    } catch (error: any) {
+      console.error('Error transcribing recording:', error);
+
+      // Update with error status
+      const updatedWithError = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              transcript: {
+                text: '',
+                status: 'error' as const,
+                createdAt: new Date().toISOString(),
+                error: error.message || 'Transkription fehlgeschlagen',
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithError);
+      await saveToStorage(updatedWithError);
+
+      throw error;
+    }
+  }, [recordings]);
+
   return {
     recordings,
     loading,
@@ -150,5 +230,6 @@ export function useRecordings() {
     deleteRecording,
     getRecording,
     refresh: loadRecordings,
+    transcribeRecording,
   };
 }

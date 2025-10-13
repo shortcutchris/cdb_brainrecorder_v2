@@ -19,6 +19,7 @@ interface RecordingItemProps {
   onPlay: (id: string) => void;
   onDelete: (id: string) => void;
   onRename: (id: string, newName: string) => void;
+  onTranscript: (id: string) => void;
 }
 
 export default function RecordingItem({
@@ -26,8 +27,10 @@ export default function RecordingItem({
   onPlay,
   onDelete,
   onRename,
+  onTranscript,
 }: RecordingItemProps) {
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showMenuModal, setShowMenuModal] = useState(false);
   const [newName, setNewName] = useState(recording.name);
   const { colors } = useTheme();
 
@@ -59,12 +62,20 @@ export default function RecordingItem({
   return (
     <>
       <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <Ionicons name="mic-outline" size={20} color={colors.primary} />
-          <Text style={[styles.title, { color: colors.text }]}>
-            {recording.name}
-          </Text>
+        {/* Title Row with Menu */}
+        <View style={styles.titleRow}>
+          <View style={styles.titleContainer}>
+            <Ionicons name="mic-outline" size={20} color={colors.primary} />
+            <Text style={[styles.title, { color: colors.text }]}>
+              {recording.name}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowMenuModal(true)}
+            style={styles.menuButton}
+          >
+            <Ionicons name="ellipsis-vertical" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
         </View>
 
         {/* Metadata */}
@@ -148,6 +159,40 @@ export default function RecordingItem({
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Menu Modal */}
+      <Modal
+        visible={showMenuModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenuModal(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowMenuModal(false)}
+        >
+          <Pressable
+            style={[styles.menuModalContent, { backgroundColor: colors.card }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setShowMenuModal(false);
+                onTranscript(recording.id);
+              }}
+              style={styles.menuItem}
+            >
+              <Ionicons name="document-text-outline" size={24} color={colors.success} />
+              <View style={styles.menuItemTextContainer}>
+                <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
+                <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                  Audio zu Text konvertieren
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }
@@ -165,14 +210,25 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    flex: 1,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
+    marginLeft: 8,
+    flex: 1,
+  },
+  menuButton: {
+    padding: 4,
     marginLeft: 8,
   },
   metadata: {
@@ -255,5 +311,34 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 12,
+  },
+  menuModalContent: {
+    borderRadius: 12,
+    padding: 8,
+    width: '80%',
+    maxWidth: 350,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    gap: 12,
+  },
+  menuItemTextContainer: {
+    flex: 1,
+  },
+  menuItemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  menuItemSubtitle: {
+    fontSize: 13,
   },
 });

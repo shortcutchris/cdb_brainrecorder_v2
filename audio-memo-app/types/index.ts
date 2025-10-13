@@ -1,4 +1,23 @@
 /**
+ * Transcript Status
+ */
+export type TranscriptStatus = 'pending' | 'processing' | 'completed' | 'error';
+
+/**
+ * Transcript Interface
+ */
+export interface Transcript {
+  /** Transcribed text */
+  text: string;
+  /** Current status of transcription */
+  status: TranscriptStatus;
+  /** ISO timestamp of creation */
+  createdAt: string;
+  /** Error message if status is 'error' */
+  error?: string;
+}
+
+/**
  * Audio Recording Interface
  * Represents a single audio recording with metadata
  */
@@ -13,6 +32,8 @@ export interface Recording {
   createdAt: string;
   /** Duration in seconds */
   duration: number;
+  /** Optional transcript */
+  transcript?: Transcript;
 }
 
 /**
@@ -23,4 +44,5 @@ export type RootStackParamList = {
   Player: { recordingId: string };
   Recording: undefined;
   Settings: undefined;
+  Transcript: { recordingId: string };
 };

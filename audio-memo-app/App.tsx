@@ -12,6 +12,7 @@ import HomeScreen from './screens/HomeScreen';
 import PlayerScreen from './screens/PlayerScreen';
 import RecordingScreen from './screens/RecordingScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import TranscriptScreen from './screens/TranscriptScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -103,6 +104,15 @@ function AppNavigator() {
           component={SettingsScreen}
           options={{
             title: 'Einstellungen',
+            presentation: 'card',
+            headerBackTitle: '',
+          }}
+        />
+        <Stack.Screen
+          name="Transcript"
+          component={TranscriptScreen}
+          options={{
+            title: 'Transkript',
             presentation: 'card',
             headerBackTitle: '',
           }}

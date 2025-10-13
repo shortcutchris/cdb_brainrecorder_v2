@@ -36,6 +36,10 @@ export default function HomeScreen({ navigation }: Props) {
     navigation.navigate('Player', { recordingId });
   };
 
+  const handleTranscript = (recordingId: string) => {
+    navigation.navigate('Transcript', { recordingId });
+  };
+
   const handleStartRecording = () => {
     navigation.navigate('Recording');
   };
@@ -101,6 +105,7 @@ export default function HomeScreen({ navigation }: Props) {
             onPlay={handlePlay}
             onDelete={deleteRecording}
             onRename={updateRecording}
+            onTranscript={handleTranscript}
           />
         )}
         contentContainerStyle={styles.listContent}
