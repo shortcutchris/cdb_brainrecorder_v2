@@ -22,15 +22,21 @@ export default function HomeScreen({ navigation }: Props) {
     useRecordings();
   const { colors } = useTheme();
 
-  // Reload recordings when returning from Recording screen
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // Refresh without showing loading state to avoid flickering
+  // Auto-refresh when screen is focused and poll for updates
+  useFocusEffect(
+    React.useCallback(() => {
+      // Initial refresh when screen is focused
       refresh(false);
-    });
 
-    return unsubscribe;
-  }, [navigation, refresh]);
+      // Set up polling to check for status updates every 2 seconds
+      const interval = setInterval(() => {
+        refresh(false);
+      }, 2000);
+
+      // Cleanup: stop polling when screen loses focus
+      return () => clearInterval(interval);
+    }, [refresh])
+  );
 
   const handlePlay = (recordingId: string) => {
     navigation.navigate('Player', { recordingId });

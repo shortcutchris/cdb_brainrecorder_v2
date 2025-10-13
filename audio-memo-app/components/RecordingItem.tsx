@@ -193,26 +193,8 @@ export default function RecordingItem({
             style={[styles.menuModalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            {/* Conditional Menu Items based on transcript status */}
-            {(!recording.transcript || recording.transcript.status === 'error') && (
-              <TouchableOpacity
-                onPress={() => {
-                  setShowMenuModal(false);
-                  onTranscript(recording.id);
-                }}
-                style={styles.menuItem}
-              >
-                <Ionicons name="document-text-outline" size={24} color={colors.success} />
-                <View style={styles.menuItemTextContainer}>
-                  <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
-                  <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                    Audio zu Text konvertieren
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-
-            {recording.transcript?.status === 'processing' && (
+            {/* Transkript Button - Always visible */}
+            {recording.transcript?.status === 'processing' ? (
               <View style={[styles.menuItem, { opacity: 0.6 }]}>
                 <Ionicons name="hourglass-outline" size={24} color={colors.textSecondary} />
                 <View style={styles.menuItemTextContainer}>
@@ -224,67 +206,111 @@ export default function RecordingItem({
                   </Text>
                 </View>
               </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => {
+                  setShowMenuModal(false);
+                  onTranscript(recording.id);
+                }}
+                style={styles.menuItem}
+              >
+                <Ionicons
+                  name="document-text-outline"
+                  size={24}
+                  color={recording.transcript?.status === 'completed' ? colors.success : colors.primary}
+                />
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
+                  <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                    {recording.transcript?.status === 'completed'
+                      ? 'Transkript anzeigen'
+                      : 'Audio zu Text konvertieren'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             )}
 
-            {recording.transcript?.status === 'completed' && (
-              <>
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowMenuModal(false);
-                    onTranscript(recording.id);
-                  }}
-                  style={styles.menuItem}
-                >
-                  <Ionicons name="document-text-outline" size={24} color={colors.success} />
-                  <View style={styles.menuItemTextContainer}>
-                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
-                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                      Transkript anzeigen
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+            <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
 
-                <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
+            {/* AI Zusammenfassung - Always visible, disabled if no transcript */}
+            <TouchableOpacity
+              onPress={() => {
+                if (recording.transcript?.status === 'completed') {
+                  setShowMenuModal(false);
+                  onSummary(recording.id);
+                } else {
+                  Alert.alert(
+                    'Transkript benötigt',
+                    recording.transcript?.status === 'processing'
+                      ? 'Bitte warte, bis die Transkription abgeschlossen ist.'
+                      : 'Bitte erstelle zuerst ein Transkript dieser Aufnahme.'
+                  );
+                }
+              }}
+              style={[styles.menuItem, recording.transcript?.status !== 'completed' && { opacity: 0.5 }]}
+            >
+              <Ionicons
+                name="sparkles-outline"
+                size={24}
+                color={recording.transcript?.status === 'completed' ? colors.primary : colors.textSecondary}
+              />
+              <View style={styles.menuItemTextContainer}>
+                <Text style={[
+                  styles.menuItemTitle,
+                  { color: recording.transcript?.status === 'completed' ? colors.text : colors.textSecondary }
+                ]}>
+                  AI Zusammenfassung
+                </Text>
+                <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                  {recording.transcript?.status === 'completed'
+                    ? 'Automatische Zusammenfassung'
+                    : recording.transcript?.status === 'processing'
+                    ? 'Warte auf Transkript...'
+                    : 'Transkript benötigt'}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowMenuModal(false);
-                    onSummary(recording.id);
-                  }}
-                  style={styles.menuItem}
-                >
-                  <Ionicons name="sparkles-outline" size={24} color={colors.primary} />
-                  <View style={styles.menuItemTextContainer}>
-                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>
-                      AI Zusammenfassung
-                    </Text>
-                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                      Automatische Zusammenfassung
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+            <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
 
-                <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowMenuModal(false);
-                    onCustomPrompt(recording.id);
-                  }}
-                  style={styles.menuItem}
-                >
-                  <Ionicons name="chatbubbles-outline" size={24} color={colors.primary} />
-                  <View style={styles.menuItemTextContainer}>
-                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>
-                      AI Custom Prompt
-                    </Text>
-                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                      Eigene Anweisungen ausführen
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </>
-            )}
+            {/* AI Custom Prompt - Always visible, disabled if no transcript */}
+            <TouchableOpacity
+              onPress={() => {
+                if (recording.transcript?.status === 'completed') {
+                  setShowMenuModal(false);
+                  onCustomPrompt(recording.id);
+                } else {
+                  Alert.alert(
+                    'Transkript benötigt',
+                    recording.transcript?.status === 'processing'
+                      ? 'Bitte warte, bis die Transkription abgeschlossen ist.'
+                      : 'Bitte erstelle zuerst ein Transkript dieser Aufnahme.'
+                  );
+                }
+              }}
+              style={[styles.menuItem, recording.transcript?.status !== 'completed' && { opacity: 0.5 }]}
+            >
+              <Ionicons
+                name="chatbubbles-outline"
+                size={24}
+                color={recording.transcript?.status === 'completed' ? colors.primary : colors.textSecondary}
+              />
+              <View style={styles.menuItemTextContainer}>
+                <Text style={[
+                  styles.menuItemTitle,
+                  { color: recording.transcript?.status === 'completed' ? colors.text : colors.textSecondary }
+                ]}>
+                  AI Custom Prompt
+                </Text>
+                <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                  {recording.transcript?.status === 'completed'
+                    ? 'Eigene Anweisungen ausführen'
+                    : recording.transcript?.status === 'processing'
+                    ? 'Warte auf Transkript...'
+                    : 'Transkript benötigt'}
+                </Text>
+              </View>
+            </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
