@@ -171,9 +171,33 @@ export function useRecordings() {
         recordingUri = recording.uri;
       }
 
-      // Load current recordings to ensure we have the latest state
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      const currentRecordings: Recording[] = stored ? JSON.parse(stored) : recordings;
+      // Load current recordings with retry logic to ensure recording exists
+      let currentRecordings: Recording[] = [];
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        const loadedRecordings: Recording[] = stored ? JSON.parse(stored) : [];
+
+        // Check if recording exists
+        const foundRecording = loadedRecordings.find(r => r.id === id);
+        if (foundRecording) {
+          currentRecordings = loadedRecordings;
+          break;
+        }
+
+        // Wait before retry
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      // If recording still not found after retries, throw error
+      if (!currentRecordings.find(r => r.id === id)) {
+        throw new Error('Aufnahme nicht gefunden nach mehreren Versuchen');
+      }
 
       // Set status to processing
       const updatedWithProcessing = currentRecordings.map(rec =>
@@ -248,7 +272,11 @@ export function useRecordings() {
    */
   const generateRecordingSummary = useCallback(async (id: string) => {
     try {
-      const recording = recordings.find(r => r.id === id);
+      // Load from AsyncStorage to get latest state
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings: Recording[] = stored ? JSON.parse(stored) : recordings;
+
+      const recording = currentRecordings.find(r => r.id === id);
       if (!recording) {
         throw new Error('Aufnahme nicht gefunden');
       }
@@ -258,7 +286,7 @@ export function useRecordings() {
       }
 
       // Set status to processing
-      const updatedWithProcessing = recordings.map(rec =>
+      const updatedWithProcessing = currentRecordings.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -276,8 +304,12 @@ export function useRecordings() {
       // Call AI service
       const result = await generateSummary(recording.transcript.text);
 
+      // Reload to get latest state
+      const stored2 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings2: Recording[] = stored2 ? JSON.parse(stored2) : recordings;
+
       // Update with completed summary
-      const updatedWithSummary = recordings.map(rec =>
+      const updatedWithSummary = currentRecordings2.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -296,8 +328,12 @@ export function useRecordings() {
     } catch (error: any) {
       console.error('Error generating summary:', error);
 
+      // Reload to get latest state
+      const stored3 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings3: Recording[] = stored3 ? JSON.parse(stored3) : recordings;
+
       // Update with error status
-      const updatedWithError = recordings.map(rec =>
+      const updatedWithError = currentRecordings3.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -322,7 +358,11 @@ export function useRecordings() {
    */
   const executeRecordingPrompt = useCallback(async (id: string, prompt: string) => {
     try {
-      const recording = recordings.find(r => r.id === id);
+      // Load from AsyncStorage to get latest state
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings: Recording[] = stored ? JSON.parse(stored) : recordings;
+
+      const recording = currentRecordings.find(r => r.id === id);
       if (!recording) {
         throw new Error('Aufnahme nicht gefunden');
       }
@@ -340,7 +380,7 @@ export function useRecordings() {
       };
 
       // Add to customPrompts array
-      const updatedWithProcessing = recordings.map(rec =>
+      const updatedWithProcessing = currentRecordings.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -354,8 +394,12 @@ export function useRecordings() {
       // Call AI service
       const result = await executeCustomPrompt(recording.transcript.text, prompt);
 
+      // Reload to get latest state
+      const stored2 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings2: Recording[] = stored2 ? JSON.parse(stored2) : recordings;
+
       // Update the last prompt result with completed status
-      const updatedWithResult = recordings.map(rec =>
+      const updatedWithResult = currentRecordings2.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -378,8 +422,12 @@ export function useRecordings() {
     } catch (error: any) {
       console.error('Error executing custom prompt:', error);
 
+      // Reload to get latest state
+      const stored3 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings3: Recording[] = stored3 ? JSON.parse(stored3) : recordings;
+
       // Update the last prompt result with error status
-      const updatedWithError = recordings.map(rec =>
+      const updatedWithError = currentRecordings3.map(rec =>
         rec.id === id
           ? {
               ...rec,

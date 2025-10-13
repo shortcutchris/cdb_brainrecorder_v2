@@ -63,13 +63,12 @@ export default function RecordingScreen({ navigation }: Props) {
     if (newRecording) {
       await addRecording(newRecording);
 
-      // Auto-transcribe if enabled - pass URI directly to avoid state sync issues
+      // Auto-transcribe if enabled - pass URI directly and use retry logic in transcribeRecording
       if (autoTranscribeEnabled) {
-        setTimeout(() => {
-          transcribeRecording(newRecording.id, newRecording.uri).catch((error) => {
-            console.error('Auto-transcribe error:', error);
-          });
-        }, 100);
+        // Start transcription asynchronously (don't wait for completion)
+        transcribeRecording(newRecording.id, newRecording.uri).catch((error) => {
+          console.error('Auto-transcribe error:', error);
+        });
       }
 
       navigation.goBack();
