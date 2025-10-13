@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { RootStackParamList } from '../types';
@@ -20,11 +21,18 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Summary'>;
 
 export default function SummaryScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
-  const { getRecording, generateRecordingSummary } = useRecordings();
+  const { getRecording, generateRecordingSummary, refresh } = useRecordings();
   const { colors } = useTheme();
   const [isGenerating, setIsGenerating] = useState(false);
 
   const recording = getRecording(recordingId);
+
+  // Refresh data when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh(false);
+    }, [refresh])
+  );
 
   useEffect(() => {
     if (!recording) {

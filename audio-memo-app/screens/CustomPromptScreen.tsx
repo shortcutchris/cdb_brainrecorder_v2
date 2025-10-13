@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { RootStackParamList, AiResult } from '../types';
@@ -23,12 +24,19 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CustomPrompt'>;
 
 export default function CustomPromptScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
-  const { getRecording, executeRecordingPrompt } = useRecordings();
+  const { getRecording, executeRecordingPrompt, refresh } = useRecordings();
   const { colors } = useTheme();
   const [prompt, setPrompt] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
 
   const recording = getRecording(recordingId);
+
+  // Refresh data when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh(false);
+    }, [refresh])
+  );
 
   useEffect(() => {
     if (!recording) {

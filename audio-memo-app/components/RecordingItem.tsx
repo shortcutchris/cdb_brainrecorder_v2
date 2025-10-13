@@ -8,6 +8,7 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Recording } from '../types';
@@ -73,6 +74,19 @@ export default function RecordingItem({
             <Text style={[styles.title, { color: colors.text }]}>
               {recording.name}
             </Text>
+            {/* Status Badge (Compact - right of title) */}
+            {recording.transcript?.status === 'processing' && (
+              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.primary + '20' }]}>
+                <ActivityIndicator size="small" color={colors.primary} style={styles.badgeSpinner} />
+                <Text style={[styles.statusBadgeText, { color: colors.primary }]}>Trans.</Text>
+              </View>
+            )}
+            {recording.summary?.status === 'processing' && (
+              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
+                <ActivityIndicator size="small" color={colors.success} style={styles.badgeSpinner} />
+                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Zus.</Text>
+              </View>
+            )}
           </View>
           <TouchableOpacity
             onPress={() => setShowMenuModal(true)}
@@ -425,5 +439,21 @@ const styles = StyleSheet.create({
   menuDivider: {
     height: 1,
     marginHorizontal: 16,
+  },
+  statusBadgeCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    gap: 4,
+  },
+  badgeSpinner: {
+    transform: [{ scale: 0.7 }],
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
