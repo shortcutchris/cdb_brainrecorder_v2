@@ -78,13 +78,6 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
             Starte deine erste{'\n'}Aufnahme
           </Text>
-          <TouchableOpacity
-            onPress={handleStartRecording}
-            style={[styles.startButton, { backgroundColor: colors.primary }]}
-          >
-            <Ionicons name="mic" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-            <Text style={styles.startButtonText}>Start</Text>
-          </TouchableOpacity>
         </View>
 
         {/* FAB for consistency (even in empty state) */}
@@ -164,25 +157,7 @@ const styles = StyleSheet.create({
   },
   welcomeSubtitle: {
     fontSize: 18,
-    marginBottom: 32,
     textAlign: 'center',
-  },
-  startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    shadowColor: '#ffaa3a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  startButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
