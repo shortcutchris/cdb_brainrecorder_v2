@@ -40,6 +40,14 @@ export default function HomeScreen({ navigation }: Props) {
     navigation.navigate('Transcript', { recordingId });
   };
 
+  const handleSummary = (recordingId: string) => {
+    navigation.navigate('Summary', { recordingId });
+  };
+
+  const handleCustomPrompt = (recordingId: string) => {
+    navigation.navigate('CustomPrompt', { recordingId });
+  };
+
   const handleStartRecording = () => {
     navigation.navigate('Recording');
   };
@@ -106,6 +114,8 @@ export default function HomeScreen({ navigation }: Props) {
             onDelete={deleteRecording}
             onRename={updateRecording}
             onTranscript={handleTranscript}
+            onSummary={handleSummary}
+            onCustomPrompt={handleCustomPrompt}
           />
         )}
         contentContainerStyle={styles.listContent}

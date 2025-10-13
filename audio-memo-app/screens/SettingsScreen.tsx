@@ -10,11 +10,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 export default function SettingsScreen({ navigation }: Props) {
   const { themeMode, colors, setThemeMode, isDark } = useTheme();
+  const { autoTranscribeEnabled, setAutoTranscribeEnabled } = useSettings();
 
   const handleThemeChange = async (mode: 'auto' | 'light' | 'dark') => {
     await setThemeMode(mode);
@@ -104,6 +106,39 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
               </View>
               <Ionicons name="moon-outline" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* AI Settings Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="sparkles-outline" size={20} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              KI Einstellungen
+            </Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TouchableOpacity
+              style={styles.option}
+              onPress={() => setAutoTranscribeEnabled(!autoTranscribeEnabled)}
+            >
+              <View style={styles.optionLeft}>
+                <View style={[styles.checkbox, { borderColor: colors.border, backgroundColor: autoTranscribeEnabled ? colors.primary : 'transparent' }]}>
+                  {autoTranscribeEnabled && (
+                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                  )}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.optionText, { color: colors.text }]}>
+                    Automatisches Transkribieren
+                  </Text>
+                  <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                    Nach Aufnahme automatisch transkribieren
+                  </Text>
+                </View>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -215,6 +250,15 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   optionText: {
     fontSize: 16,

@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from './types';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -13,6 +14,8 @@ import PlayerScreen from './screens/PlayerScreen';
 import RecordingScreen from './screens/RecordingScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import TranscriptScreen from './screens/TranscriptScreen';
+import SummaryScreen from './screens/SummaryScreen';
+import CustomPromptScreen from './screens/CustomPromptScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -117,6 +120,24 @@ function AppNavigator() {
             headerBackTitle: '',
           }}
         />
+        <Stack.Screen
+          name="Summary"
+          component={SummaryScreen}
+          options={{
+            title: 'AI Zusammenfassung',
+            presentation: 'card',
+            headerBackTitle: '',
+          }}
+        />
+        <Stack.Screen
+          name="CustomPrompt"
+          component={CustomPromptScreen}
+          options={{
+            title: 'AI Custom Prompt',
+            presentation: 'card',
+            headerBackTitle: '',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -125,7 +146,9 @@ function AppNavigator() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppNavigator />
+      <SettingsProvider>
+        <AppNavigator />
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

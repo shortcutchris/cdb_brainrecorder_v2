@@ -6,13 +6,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { startRecording, stopRecording, formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Recording'>;
 
 export default function RecordingScreen({ navigation }: Props) {
-  const { addRecording } = useRecordings();
+  const { addRecording, transcribeRecording } = useRecordings();
   const { colors } = useTheme();
+  const { autoTranscribeEnabled } = useSettings();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [duration, setDuration] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -60,6 +62,16 @@ export default function RecordingScreen({ navigation }: Props) {
 
     if (newRecording) {
       await addRecording(newRecording);
+
+      // Auto-transcribe if enabled - pass URI directly to avoid state sync issues
+      if (autoTranscribeEnabled) {
+        setTimeout(() => {
+          transcribeRecording(newRecording.id, newRecording.uri).catch((error) => {
+            console.error('Auto-transcribe error:', error);
+          });
+        }, 100);
+      }
+
       navigation.goBack();
     } else {
       Alert.alert('Fehler', 'Aufnahme konnte nicht gespeichert werden.');

@@ -20,6 +20,8 @@ interface RecordingItemProps {
   onDelete: (id: string) => void;
   onRename: (id: string, newName: string) => void;
   onTranscript: (id: string) => void;
+  onSummary: (id: string) => void;
+  onCustomPrompt: (id: string) => void;
 }
 
 export default function RecordingItem({
@@ -28,6 +30,8 @@ export default function RecordingItem({
   onDelete,
   onRename,
   onTranscript,
+  onSummary,
+  onCustomPrompt,
 }: RecordingItemProps) {
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
@@ -175,21 +179,98 @@ export default function RecordingItem({
             style={[styles.menuModalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <TouchableOpacity
-              onPress={() => {
-                setShowMenuModal(false);
-                onTranscript(recording.id);
-              }}
-              style={styles.menuItem}
-            >
-              <Ionicons name="document-text-outline" size={24} color={colors.success} />
-              <View style={styles.menuItemTextContainer}>
-                <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
-                <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                  Audio zu Text konvertieren
-                </Text>
+            {/* Conditional Menu Items based on transcript status */}
+            {(!recording.transcript || recording.transcript.status === 'error') && (
+              <TouchableOpacity
+                onPress={() => {
+                  setShowMenuModal(false);
+                  onTranscript(recording.id);
+                }}
+                style={styles.menuItem}
+              >
+                <Ionicons name="document-text-outline" size={24} color={colors.success} />
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
+                  <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                    Audio zu Text konvertieren
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {recording.transcript?.status === 'processing' && (
+              <View style={[styles.menuItem, { opacity: 0.6 }]}>
+                <Ionicons name="hourglass-outline" size={24} color={colors.textSecondary} />
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={[styles.menuItemTitle, { color: colors.textSecondary }]}>
+                    Transkription läuft...
+                  </Text>
+                  <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                    Bitte warten
+                  </Text>
+                </View>
               </View>
-            </TouchableOpacity>
+            )}
+
+            {recording.transcript?.status === 'completed' && (
+              <>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowMenuModal(false);
+                    onTranscript(recording.id);
+                  }}
+                  style={styles.menuItem}
+                >
+                  <Ionicons name="document-text-outline" size={24} color={colors.success} />
+                  <View style={styles.menuItemTextContainer}>
+                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
+                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                      Transkript anzeigen
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowMenuModal(false);
+                    onSummary(recording.id);
+                  }}
+                  style={styles.menuItem}
+                >
+                  <Ionicons name="sparkles-outline" size={24} color={colors.primary} />
+                  <View style={styles.menuItemTextContainer}>
+                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>
+                      AI Zusammenfassung
+                    </Text>
+                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                      Automatische Zusammenfassung
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowMenuModal(false);
+                    onCustomPrompt(recording.id);
+                  }}
+                  style={styles.menuItem}
+                >
+                  <Ionicons name="chatbubbles-outline" size={24} color={colors.primary} />
+                  <View style={styles.menuItemTextContainer}>
+                    <Text style={[styles.menuItemTitle, { color: colors.text }]}>
+                      AI Custom Prompt
+                    </Text>
+                    <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
+                      Eigene Anweisungen ausführen
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
           </Pressable>
         </Pressable>
       </Modal>
@@ -340,5 +421,9 @@ const styles = StyleSheet.create({
   },
   menuItemSubtitle: {
     fontSize: 13,
+  },
+  menuDivider: {
+    height: 1,
+    marginHorizontal: 16,
   },
 });

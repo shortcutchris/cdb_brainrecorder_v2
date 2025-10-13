@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Recording } from '../types';
 import { transcribeAudio } from '../services/transcriptionService';
+import { generateSummary, executeCustomPrompt } from '../services/aiService';
 
 const STORAGE_KEY = '@audio_memo_recordings';
 
@@ -154,16 +155,28 @@ export function useRecordings() {
 
   /**
    * Transcribe a recording using OpenAI Whisper API
+   * @param id Recording ID
+   * @param audioUri Optional audio URI (if recording is not yet in state)
    */
-  const transcribeRecording = useCallback(async (id: string) => {
+  const transcribeRecording = useCallback(async (id: string, audioUri?: string) => {
     try {
-      const recording = recordings.find(r => r.id === id);
-      if (!recording) {
-        throw new Error('Aufnahme nicht gefunden');
+      // If URI is provided, use it directly (for auto-transcribe)
+      // Otherwise, find the recording in the array
+      let recordingUri = audioUri;
+      if (!recordingUri) {
+        const recording = recordings.find(r => r.id === id);
+        if (!recording) {
+          throw new Error('Aufnahme nicht gefunden');
+        }
+        recordingUri = recording.uri;
       }
 
+      // Load current recordings to ensure we have the latest state
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings: Recording[] = stored ? JSON.parse(stored) : recordings;
+
       // Set status to processing
-      const updatedWithProcessing = recordings.map(rec =>
+      const updatedWithProcessing = currentRecordings.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -179,10 +192,14 @@ export function useRecordings() {
       await saveToStorage(updatedWithProcessing);
 
       // Call transcription service
-      const result = await transcribeAudio(recording.uri);
+      const result = await transcribeAudio(recordingUri);
+
+      // Reload to get latest state
+      const stored2 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings2: Recording[] = stored2 ? JSON.parse(stored2) : recordings;
 
       // Update with completed transcript
-      const updatedWithTranscript = recordings.map(rec =>
+      const updatedWithTranscript = currentRecordings2.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -201,8 +218,12 @@ export function useRecordings() {
     } catch (error: any) {
       console.error('Error transcribing recording:', error);
 
+      // Reload to get latest state
+      const stored3 = await AsyncStorage.getItem(STORAGE_KEY);
+      const currentRecordings3: Recording[] = stored3 ? JSON.parse(stored3) : recordings;
+
       // Update with error status
-      const updatedWithError = recordings.map(rec =>
+      const updatedWithError = currentRecordings3.map(rec =>
         rec.id === id
           ? {
               ...rec,
@@ -222,6 +243,166 @@ export function useRecordings() {
     }
   }, [recordings]);
 
+  /**
+   * Generate AI summary for a recording
+   */
+  const generateRecordingSummary = useCallback(async (id: string) => {
+    try {
+      const recording = recordings.find(r => r.id === id);
+      if (!recording) {
+        throw new Error('Aufnahme nicht gefunden');
+      }
+
+      if (!recording.transcript || recording.transcript.status !== 'completed') {
+        throw new Error('Kein Transkript vorhanden. Bitte erst transkribieren.');
+      }
+
+      // Set status to processing
+      const updatedWithProcessing = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              summary: {
+                text: '',
+                status: 'processing' as const,
+                createdAt: new Date().toISOString(),
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithProcessing);
+      await saveToStorage(updatedWithProcessing);
+
+      // Call AI service
+      const result = await generateSummary(recording.transcript.text);
+
+      // Update with completed summary
+      const updatedWithSummary = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              summary: {
+                text: result.text,
+                status: 'completed' as const,
+                createdAt: new Date().toISOString(),
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithSummary);
+      await saveToStorage(updatedWithSummary);
+
+      return true;
+    } catch (error: any) {
+      console.error('Error generating summary:', error);
+
+      // Update with error status
+      const updatedWithError = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              summary: {
+                text: '',
+                status: 'error' as const,
+                createdAt: new Date().toISOString(),
+                error: error.message || 'Zusammenfassung fehlgeschlagen',
+              },
+            }
+          : rec
+      );
+      setRecordings(updatedWithError);
+      await saveToStorage(updatedWithError);
+
+      throw error;
+    }
+  }, [recordings]);
+
+  /**
+   * Execute custom prompt on a recording
+   */
+  const executeRecordingPrompt = useCallback(async (id: string, prompt: string) => {
+    try {
+      const recording = recordings.find(r => r.id === id);
+      if (!recording) {
+        throw new Error('Aufnahme nicht gefunden');
+      }
+
+      if (!recording.transcript || recording.transcript.status !== 'completed') {
+        throw new Error('Kein Transkript vorhanden. Bitte erst transkribieren.');
+      }
+
+      // Create new prompt result with processing status
+      const newPromptResult = {
+        text: '',
+        status: 'processing' as const,
+        createdAt: new Date().toISOString(),
+        prompt,
+      };
+
+      // Add to customPrompts array
+      const updatedWithProcessing = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              customPrompts: [...(rec.customPrompts || []), newPromptResult],
+            }
+          : rec
+      );
+      setRecordings(updatedWithProcessing);
+      await saveToStorage(updatedWithProcessing);
+
+      // Call AI service
+      const result = await executeCustomPrompt(recording.transcript.text, prompt);
+
+      // Update the last prompt result with completed status
+      const updatedWithResult = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              customPrompts: [
+                ...(rec.customPrompts?.slice(0, -1) || []),
+                {
+                  text: result.text,
+                  status: 'completed' as const,
+                  createdAt: new Date().toISOString(),
+                  prompt,
+                },
+              ],
+            }
+          : rec
+      );
+      setRecordings(updatedWithResult);
+      await saveToStorage(updatedWithResult);
+
+      return true;
+    } catch (error: any) {
+      console.error('Error executing custom prompt:', error);
+
+      // Update the last prompt result with error status
+      const updatedWithError = recordings.map(rec =>
+        rec.id === id
+          ? {
+              ...rec,
+              customPrompts: [
+                ...(rec.customPrompts?.slice(0, -1) || []),
+                {
+                  text: '',
+                  status: 'error' as const,
+                  createdAt: new Date().toISOString(),
+                  error: error.message || 'Prompt fehlgeschlagen',
+                  prompt,
+                },
+              ],
+            }
+          : rec
+      );
+      setRecordings(updatedWithError);
+      await saveToStorage(updatedWithError);
+
+      throw error;
+    }
+  }, [recordings]);
+
   return {
     recordings,
     loading,
@@ -231,5 +412,7 @@ export function useRecordings() {
     getRecording,
     refresh: loadRecordings,
     transcribeRecording,
+    generateRecordingSummary,
+    executeRecordingPrompt,
   };
 }
