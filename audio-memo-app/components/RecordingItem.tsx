@@ -37,7 +37,43 @@ export default function RecordingItem({
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [newName, setNewName] = useState(recording.name);
+  const [showCompletedBadge, setShowCompletedBadge] = useState<{
+    transcript: boolean;
+    summary: boolean;
+  }>({ transcript: false, summary: false });
   const { colors } = useTheme();
+  const prevStatusRef = React.useRef({
+    transcript: recording.transcript?.status,
+    summary: recording.summary?.status,
+  });
+
+  // Detect status changes and show completed badge
+  React.useEffect(() => {
+    const prevTranscript = prevStatusRef.current.transcript;
+    const currentTranscript = recording.transcript?.status;
+
+    if (prevTranscript === 'processing' && currentTranscript === 'completed') {
+      setShowCompletedBadge(prev => ({ ...prev, transcript: true }));
+      setTimeout(() => {
+        setShowCompletedBadge(prev => ({ ...prev, transcript: false }));
+      }, 3000);
+    }
+
+    const prevSummary = prevStatusRef.current.summary;
+    const currentSummary = recording.summary?.status;
+
+    if (prevSummary === 'processing' && currentSummary === 'completed') {
+      setShowCompletedBadge(prev => ({ ...prev, summary: true }));
+      setTimeout(() => {
+        setShowCompletedBadge(prev => ({ ...prev, summary: false }));
+      }, 3000);
+    }
+
+    prevStatusRef.current = {
+      transcript: currentTranscript,
+      summary: currentSummary,
+    };
+  }, [recording.transcript?.status, recording.summary?.status]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -81,10 +117,22 @@ export default function RecordingItem({
                 <Text style={[styles.statusBadgeText, { color: colors.primary }]}>Trans.</Text>
               </View>
             )}
+            {showCompletedBadge.transcript && (
+              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Fertig!</Text>
+              </View>
+            )}
             {recording.summary?.status === 'processing' && (
               <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
                 <ActivityIndicator size="small" color={colors.success} style={styles.badgeSpinner} />
                 <Text style={[styles.statusBadgeText, { color: colors.success }]}>Zus.</Text>
+              </View>
+            )}
+            {showCompletedBadge.summary && (
+              <View style={[styles.statusBadgeCompact, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="checkmark-circle" size={14} color={colors.success} />
+                <Text style={[styles.statusBadgeText, { color: colors.success }]}>Fertig!</Text>
               </View>
             )}
           </View>

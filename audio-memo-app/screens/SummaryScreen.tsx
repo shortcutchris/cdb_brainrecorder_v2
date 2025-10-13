@@ -24,22 +24,28 @@ export default function SummaryScreen({ route, navigation }: Props) {
   const { getRecording, generateRecordingSummary, refresh } = useRecordings();
   const { colors } = useTheme();
   const [isGenerating, setIsGenerating] = useState(false);
-
-  const recording = getRecording(recordingId);
+  const [isReady, setIsReady] = useState(false);
 
   // Refresh data when screen is focused
   useFocusEffect(
     React.useCallback(() => {
-      refresh(false);
+      const loadData = async () => {
+        await refresh(false);
+        setIsReady(true);
+      };
+      loadData();
     }, [refresh])
   );
 
+  const recording = getRecording(recordingId);
+
+  // Only show error after data is loaded
   useEffect(() => {
-    if (!recording) {
+    if (isReady && !recording) {
       Alert.alert('Fehler', 'Aufnahme nicht gefunden.');
       navigation.goBack();
     }
-  }, [recording]);
+  }, [isReady, recording, navigation]);
 
   const handleGenerate = async () => {
     if (!recording) return;
