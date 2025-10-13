@@ -97,17 +97,6 @@ export default function RecordingScreen({ navigation }: Props) {
       <View style={styles.content}>
         {/* Recording Indicator */}
         <View style={styles.indicatorContainer}>
-          <View
-            style={[
-              styles.recordingDot,
-              {
-                shadowColor: '#EF4444',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.6,
-                shadowRadius: 8,
-              },
-            ]}
-          />
           <Text style={styles.recordingText}>● REC</Text>
         </View>
 
@@ -115,13 +104,6 @@ export default function RecordingScreen({ navigation }: Props) {
         <View style={styles.timerContainer}>
           <Text style={styles.timerText}>
             {formatDuration(duration)}
-          </Text>
-        </View>
-
-        {/* Waveform Placeholder (Phase 2) */}
-        <View style={styles.waveformPlaceholder}>
-          <Text style={styles.waveformText}>
-            ▓▓░░▓▓▓░░▓░▓▓
           </Text>
         </View>
 
@@ -178,23 +160,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  recordingDot: {
-    width: 16,
-    height: 16,
-    backgroundColor: '#EF4444',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
   recordingText: {
     color: '#EF4444',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 2,
   },
   timerContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 32,
-    marginBottom: 48,
+    marginBottom: 64,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -205,15 +181,6 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '700',
     color: '#1E293B',
-    textAlign: 'center',
-  },
-  waveformPlaceholder: {
-    height: 64,
-    marginBottom: 48,
-    opacity: 0.3,
-  },
-  waveformText: {
-    color: '#64748B',
     textAlign: 'center',
   },
   stopButton: {
