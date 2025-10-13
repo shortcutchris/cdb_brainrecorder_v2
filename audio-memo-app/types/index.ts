@@ -22,4 +22,5 @@ export type RootStackParamList = {
   Home: undefined;
   Player: { recordingId: string };
   Recording: undefined;
+  Settings: undefined;
 };

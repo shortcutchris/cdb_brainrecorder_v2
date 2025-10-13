@@ -9,8 +9,10 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Recording } from '../types';
 import { formatDate, formatDuration } from '../utils/audio';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface RecordingItemProps {
   recording: Recording;
@@ -27,6 +29,7 @@ export default function RecordingItem({
 }: RecordingItemProps) {
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newName, setNewName] = useState(recording.name);
+  const { colors } = useTheme();
 
   const handleDelete = () => {
     Alert.alert(
@@ -55,14 +58,17 @@ export default function RecordingItem({
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {/* Title */}
-        <Text style={styles.title}>
-          🎙️ {recording.name}
-        </Text>
+        <View style={styles.titleContainer}>
+          <Ionicons name="mic-outline" size={20} color={colors.primary} />
+          <Text style={[styles.title, { color: colors.text }]}>
+            {recording.name}
+          </Text>
+        </View>
 
         {/* Metadata */}
-        <Text style={styles.metadata}>
+        <Text style={[styles.metadata, { color: colors.textSecondary }]}>
           {formatDate(recording.createdAt)} • {formatDuration(recording.duration)}
         </Text>
 
@@ -70,9 +76,10 @@ export default function RecordingItem({
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => onPlay(recording.id)}
-            style={styles.playButton}
+            style={[styles.playButton, { backgroundColor: colors.primary }]}
           >
-            <Text style={styles.buttonText}>▶️ Play</Text>
+            <Ionicons name="play" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.buttonText}>Play</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -80,16 +87,18 @@ export default function RecordingItem({
               setNewName(recording.name);
               setShowRenameModal(true);
             }}
-            style={styles.renameButton}
+            style={[styles.renameButton, { backgroundColor: colors.textSecondary }]}
           >
-            <Text style={styles.buttonText}>✏️ Umbenennen</Text>
+            <Ionicons name="create-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.buttonText}>Umbenennen</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleDelete}
-            style={styles.deleteButton}
+            style={[styles.deleteButton, { backgroundColor: colors.danger }]}
           >
-            <Text style={styles.buttonText}>🗑️ Löschen</Text>
+            <Ionicons name="trash-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.buttonText}>Löschen</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -106,16 +115,17 @@ export default function RecordingItem({
           onPress={() => setShowRenameModal(false)}
         >
           <Pressable
-            style={styles.modalContent}
+            style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Umbenennen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Umbenennen</Text>
 
             <TextInput
               value={newName}
               onChangeText={setNewName}
               placeholder="Name der Aufnahme"
-              style={styles.textInput}
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.textInput, { borderColor: colors.border, color: colors.text }]}
               autoFocus
               onSubmitEditing={handleRename}
             />
@@ -125,12 +135,12 @@ export default function RecordingItem({
                 onPress={() => setShowRenameModal(false)}
                 style={styles.cancelButton}
               >
-                <Text style={styles.cancelButtonText}>Abbrechen</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Abbrechen</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleRename}
-                style={styles.saveButton}
+                style={[styles.saveButton, { backgroundColor: colors.primary }]}
               >
                 <Text style={styles.buttonText}>Speichern</Text>
               </TouchableOpacity>
@@ -144,8 +154,8 @@ export default function RecordingItem({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
     marginBottom: 12,
     marginHorizontal: 16,
@@ -155,15 +165,18 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1E293B',
-    marginBottom: 4,
+    marginLeft: 8,
   },
   metadata: {
     fontSize: 14,
-    color: '#64748B',
     marginBottom: 12,
   },
   buttonContainer: {
@@ -172,19 +185,22 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   playButton: {
-    backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   renameButton: {
-    backgroundColor: '#64748B',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   deleteButton: {
-    backgroundColor: '#EF4444',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -201,7 +217,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     width: '100%',
@@ -215,12 +230,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1E293B',
     marginBottom: 16,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#E2E8F0',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
@@ -236,11 +249,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   cancelButtonText: {
-    color: '#64748B',
     fontWeight: '600',
   },
   saveButton: {
-    backgroundColor: '#3B82F6',
     borderRadius: 8,
     paddingHorizontal: 24,
     paddingVertical: 12,

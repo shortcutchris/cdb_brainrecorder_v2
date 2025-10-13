@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
+import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
+import { useTheme } from '../contexts/ThemeContext';
 import { startRecording, stopRecording, formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Recording'>;
 
 export default function RecordingScreen({ navigation }: Props) {
   const { addRecording } = useRecordings();
+  const { colors } = useTheme();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [duration, setDuration] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -85,11 +88,11 @@ export default function RecordingScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header with Close Button */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel}>
-          <Text style={styles.closeButton}>✕</Text>
+        <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
+          <Ionicons name="close" size={32} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -97,12 +100,13 @@ export default function RecordingScreen({ navigation }: Props) {
       <View style={styles.content}>
         {/* Recording Indicator */}
         <View style={styles.indicatorContainer}>
-          <Text style={styles.recordingText}>● REC</Text>
+          <Ionicons name="radio-button-on" size={24} color={colors.danger} />
+          <Text style={[styles.recordingText, { color: colors.danger }]}>REC</Text>
         </View>
 
         {/* Timer */}
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>
+        <View style={[styles.timerContainer, { backgroundColor: colors.card }]}>
+          <Text style={[styles.timerText, { color: colors.text }]}>
             {formatDuration(duration)}
           </Text>
         </View>
@@ -113,18 +117,20 @@ export default function RecordingScreen({ navigation }: Props) {
           style={[
             styles.stopButton,
             {
-              shadowColor: '#EF4444',
+              backgroundColor: colors.danger,
+              shadowColor: colors.danger,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
             },
           ]}
         >
-          <Text style={styles.stopButtonText}>⏹ Stopp</Text>
+          <Ionicons name="stop" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Text style={styles.stopButtonText}>Stopp</Text>
         </TouchableOpacity>
 
         {/* Helper Text */}
-        <Text style={styles.helperText}>
+        <Text style={[styles.helperText, { color: colors.textSecondary }]}>
           Zum Speichern stoppen
         </Text>
       </View>
@@ -135,7 +141,6 @@ export default function RecordingScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
   },
   header: {
     position: 'absolute',
@@ -148,7 +153,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   closeButton: {
-    fontSize: 24,
+    padding: 4,
   },
   content: {
     flex: 1,
@@ -157,17 +162,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   indicatorContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 32,
   },
   recordingText: {
-    color: '#EF4444',
     fontSize: 20,
     fontWeight: '700',
     letterSpacing: 2,
+    marginLeft: 8,
   },
   timerContainer: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 32,
     marginBottom: 64,
@@ -180,11 +185,11 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 48,
     fontWeight: '700',
-    color: '#1E293B',
     textAlign: 'center',
   },
   stopButton: {
-    backgroundColor: '#EF4444',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 12,
     paddingHorizontal: 48,
     paddingVertical: 16,
@@ -196,7 +201,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   helperText: {
-    color: '#64748B',
     fontSize: 14,
     marginTop: 24,
     textAlign: 'center',

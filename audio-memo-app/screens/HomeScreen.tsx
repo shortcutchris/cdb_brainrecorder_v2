@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
+import { useTheme } from '../contexts/ThemeContext';
 import RecordingItem from '../components/RecordingItem';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -18,6 +20,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 export default function HomeScreen({ navigation }: Props) {
   const { recordings, loading, deleteRecording, updateRecording, refresh } =
     useRecordings();
+  const { colors } = useTheme();
 
   // Reload recordings when returning from Recording screen
   React.useEffect(() => {
@@ -39,8 +42,8 @@ export default function HomeScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -48,27 +51,30 @@ export default function HomeScreen({ navigation }: Props) {
   // Empty State
   if (recordings.length === 0) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.emptyState}>
-          <Text style={styles.emojiLarge}>🎙️</Text>
-          <Text style={styles.welcomeTitle}>Welcome!</Text>
-          <Text style={styles.welcomeSubtitle}>
+          <View style={styles.emptyIconContainer}>
+            <Ionicons name="mic-outline" size={60} color={colors.primary} />
+          </View>
+          <Text style={[styles.welcomeTitle, { color: colors.text }]}>Welcome!</Text>
+          <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
             Starte deine erste{'\n'}Aufnahme
           </Text>
           <TouchableOpacity
             onPress={handleStartRecording}
-            style={styles.startButton}
+            style={[styles.startButton, { backgroundColor: colors.primary }]}
           >
-            <Text style={styles.startButtonText}>🎤 Start</Text>
+            <Ionicons name="mic" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.startButtonText}>Start</Text>
           </TouchableOpacity>
         </View>
 
         {/* FAB for consistency (even in empty state) */}
         <TouchableOpacity
           onPress={handleStartRecording}
-          style={styles.fab}
+          style={[styles.fab, { backgroundColor: colors.primary }]}
         >
-          <Text style={styles.fabIcon}>🎤</Text>
+          <Ionicons name="mic" size={32} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
     );
@@ -76,11 +82,12 @@ export default function HomeScreen({ navigation }: Props) {
 
   // List View
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Metadata Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>
-          📂 {recordings.length} {recordings.length === 1 ? 'Aufnahme' : 'Aufnahmen'}
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <Ionicons name="folder-outline" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
+        <Text style={[styles.headerText, { color: colors.textSecondary }]}>
+          {recordings.length} {recordings.length === 1 ? 'Aufnahme' : 'Aufnahmen'}
         </Text>
       </View>
 
@@ -102,9 +109,9 @@ export default function HomeScreen({ navigation }: Props) {
       {/* Floating Action Button */}
       <TouchableOpacity
         onPress={handleStartRecording}
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
       >
-        <Text style={styles.fabIcon}>🎤</Text>
+        <Ionicons name="mic" size={32} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
   );
@@ -113,11 +120,9 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -127,25 +132,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
   },
-  emojiLarge: {
-    fontSize: 60,
+  emptyIconContainer: {
     marginBottom: 24,
   },
   welcomeTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#1E293B',
     marginBottom: 12,
     textAlign: 'center',
   },
   welcomeSubtitle: {
     fontSize: 18,
-    color: '#64748B',
     marginBottom: 32,
     textAlign: 'center',
   },
   startButton: {
-    backgroundColor: '#3B82F6',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 12,
     paddingHorizontal: 32,
     paddingVertical: 16,
@@ -161,15 +164,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
   },
   headerText: {
     fontSize: 14,
-    color: '#64748B',
   },
   listContent: {
     paddingTop: 12,
@@ -182,7 +184,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#3B82F6',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#3B82F6',
@@ -190,8 +191,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
-  },
-  fabIcon: {
-    fontSize: 30,
   },
 });
