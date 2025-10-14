@@ -48,7 +48,9 @@ export async function startRecording(): Promise<Audio.Recording | null> {
  * Stop recording and save to file system
  */
 export async function stopRecording(
-  recording: Audio.Recording
+  recording: Audio.Recording,
+  locale: string = 'de-DE',
+  label: string = 'Aufnahme'
 ): Promise<Recording | null> {
   try {
     await recording.stopAndUnloadAsync();
@@ -80,7 +82,7 @@ export async function stopRecording(
     const newRecording: Recording = {
       id,
       uri: newUri, // Use permanent URI
-      name: formatDefaultName(),
+      name: formatDefaultName(locale, label),
       createdAt: new Date().toISOString(),
       duration: Math.round(duration),
     };
@@ -95,17 +97,17 @@ export async function stopRecording(
 /**
  * Format default name with timestamp
  */
-function formatDefaultName(): string {
+function formatDefaultName(locale: string, label: string): string {
   const now = new Date();
-  const date = now.toLocaleDateString('de-DE', {
+  const date = now.toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
   });
-  const time = now.toLocaleTimeString('de-DE', {
+  const time = now.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
-  return `Aufnahme ${date} ${time}`;
+  return `${label} ${date} ${time}`;
 }
 
 /**

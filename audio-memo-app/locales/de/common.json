@@ -28,6 +28,9 @@
     "success": "Erfolgreich",
     "confirm": "Bestätigen"
   },
+  "recording": {
+    "defaultName": "Aufnahme"
+  },
   "recordingItem": {
     "play": "Play",
     "rename": "Umbenennen",

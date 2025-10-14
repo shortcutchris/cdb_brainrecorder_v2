@@ -28,6 +28,9 @@
     "success": "Success",
     "confirm": "Confirm"
   },
+  "recording": {
+    "defaultName": "Recording"
+  },
   "recordingItem": {
     "play": "Play",
     "rename": "Rename",

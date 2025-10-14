@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/config';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -60,7 +61,13 @@ export default function RecordingScreen({ navigation }: Props) {
     if (!recording) return;
 
     setIsRecording(false);
-    const newRecording = await stopRecording(recording);
+
+    // Get current language and locale for recording name
+    const currentLanguage = i18n.language;
+    const locale = currentLanguage === 'en' ? 'en-US' : 'de-DE';
+    const label = t('common:recording.defaultName');
+
+    const newRecording = await stopRecording(recording, locale, label);
 
     if (newRecording) {
       await addRecording(newRecording);
