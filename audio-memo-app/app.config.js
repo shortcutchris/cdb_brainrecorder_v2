@@ -3,12 +3,12 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: 'audio-memo-app',
+    name: 'CDB BrainRecorder',
     slug: 'audio-memo-app',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
-    userInterfaceStyle: 'light',
+    userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     splash: {
       image: './assets/splash-icon.png',
@@ -17,6 +17,12 @@ export default {
     },
     ios: {
       supportsTablet: true,
+      bundleIdentifier: 'com.cdb.brainrecorder',
+      buildNumber: '1',
+      infoPlist: {
+        NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
+        UIBackgroundModes: ['audio'],
+      },
     },
     android: {
       adaptiveIcon: {
