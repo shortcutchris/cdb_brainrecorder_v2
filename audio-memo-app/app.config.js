@@ -18,7 +18,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.cdb.brainrecorder',
-      buildNumber: '1',
+      buildNumber: '2',
       infoPlist: {
         NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
         UIBackgroundModes: ['audio'],
@@ -38,7 +38,7 @@ export default {
     },
     // Make environment variables available in the app
     extra: {
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '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',
       eas: {
         projectId: 'b2803f18-2a5a-41cd-a82e-5f4751bbf73c',
       },
