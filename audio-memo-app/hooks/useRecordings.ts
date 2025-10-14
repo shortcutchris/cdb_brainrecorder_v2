@@ -14,7 +14,7 @@ const STORAGE_KEY = '@audio_memo_recordings';
 export function useRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
-  const { autoSummaryEnabled } = useSettings();
+  const { autoSummaryEnabled, defaultLanguage } = useSettings();
 
   /**
    * Validate that recording files still exist in file system
@@ -246,7 +246,8 @@ export function useRecordings() {
         // Only trigger if summary doesn't exist or has error status
         if (updatedRecording && (!updatedRecording.summary || updatedRecording.summary.status === 'error')) {
           // Fire-and-forget: don't await, catch errors silently
-          generateRecordingSummary(id).catch(error => {
+          // Use defaultLanguage from settings
+          generateRecordingSummary(id, defaultLanguage).catch(error => {
             console.error('Auto-summary failed (silent):', error);
           });
         }
@@ -279,7 +280,7 @@ export function useRecordings() {
 
       throw error;
     }
-  }, [recordings]);
+  }, [recordings, autoSummaryEnabled, defaultLanguage]);
 
   /**
    * Generate AI summary for a recording
