@@ -4,6 +4,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from './types';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -36,6 +37,7 @@ function HeaderTitle({ title, color }: { title: string; color: string }) {
 
 function AppNavigator() {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
 
   const navigationTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -99,7 +101,7 @@ function AppNavigator() {
           name="Recording"
           component={RecordingScreen}
           options={{
-            title: 'Aufnahme',
+            title: t('recording.title'),
             presentation: 'fullScreenModal',
             headerShown: false,
           }}
@@ -108,7 +110,7 @@ function AppNavigator() {
           name="Settings"
           component={SettingsScreen}
           options={{
-            title: 'Einstellungen',
+            title: t('settings.title'),
             presentation: 'card',
             headerBackTitle: '',
           }}
@@ -117,7 +119,7 @@ function AppNavigator() {
           name="Transcript"
           component={TranscriptScreen}
           options={{
-            title: 'Transkript',
+            title: t('transcript.title'),
             presentation: 'card',
             headerBackTitle: '',
           }}
@@ -126,7 +128,7 @@ function AppNavigator() {
           name="Summary"
           component={SummaryScreen}
           options={{
-            title: 'AI Zusammenfassung',
+            title: t('summary.title'),
             presentation: 'card',
             headerBackTitle: '',
           }}
@@ -135,7 +137,7 @@ function AppNavigator() {
           name="CustomPrompt"
           component={CustomPromptScreen}
           options={{
-            title: 'AI Custom Prompt',
+            title: t('customPrompt.title'),
             presentation: 'card',
             headerBackTitle: '',
           }}
