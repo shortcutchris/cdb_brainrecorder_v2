@@ -32,12 +32,10 @@ export async function startRecording(): Promise<Audio.Recording | null> {
     console.log('✅ startRecording: Permission granted');
 
     console.log('⚙️ startRecording: Configuring audio mode...');
-    // Configure audio mode for background recording
+    // Configure audio mode - using minimal working config
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
-      staysActiveInBackground: true, // Keep recording active when app goes to background
-      shouldDuckAndroid: false,
     });
 
     console.log('✅ startRecording: Audio mode configured');
@@ -71,7 +69,6 @@ export async function stopRecording(
     await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      staysActiveInBackground: false, // Disable background mode when recording stops
     });
 
     const uri = recording.getURI();
