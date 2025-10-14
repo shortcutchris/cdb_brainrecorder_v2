@@ -54,5 +54,11 @@
     "transcriptNeededTitle": "Transcript required",
     "waitForTranscription": "Please wait until transcription is complete.",
     "createTranscriptFirst": "Please create a transcript first."
+  },
+  "modals": {
+    "selectLanguage": "Select Language"
+  },
+  "language": {
+    "selectLanguage": "Select Language"
   }
 }

@@ -54,5 +54,11 @@
     "transcriptNeededTitle": "Transkript benötigt",
     "waitForTranscription": "Bitte warte, bis die Transkription abgeschlossen ist.",
     "createTranscriptFirst": "Bitte erstelle zuerst ein Transkript dieser Aufnahme."
+  },
+  "modals": {
+    "selectLanguage": "Sprache auswählen"
+  },
+  "language": {
+    "selectLanguage": "Sprache auswählen"
   }
 }
