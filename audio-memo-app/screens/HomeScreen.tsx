@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -71,13 +72,25 @@ export default function HomeScreen({ navigation }: Props) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.emptyState}>
-          <View style={styles.emptyIconContainer}>
-            <Ionicons name="mic-outline" size={60} color={colors.primary} />
-          </View>
-          <Text style={[styles.welcomeTitle, { color: colors.text }]}>Welcome!</Text>
-          <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
-            Starte deine erste{'\n'}Aufnahme
+          <Image
+            source={require('../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+            CDB BrainRecorder
           </Text>
+          <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
+            Nimm deine Gedanken auf und lass sie durch KI verarbeiten.{'\n\n'}
+            Erstelle Transkripte, generiere Zusammenfassungen und stelle individuelle Fragen zu deinen Aufnahmen.
+          </Text>
+          <TouchableOpacity
+            onPress={handleStartRecording}
+            style={[styles.startButton, { backgroundColor: colors.primary }]}
+          >
+            <Ionicons name="mic" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.startButtonText}>Erste Aufnahme starten</Text>
+          </TouchableOpacity>
         </View>
 
         {/* FAB for consistency (even in empty state) */}
@@ -143,21 +156,43 @@ const styles = StyleSheet.create({
   emptyState: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 80,
     paddingHorizontal: 32,
   },
-  emptyIconContainer: {
-    marginBottom: 24,
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 32,
   },
   welcomeTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 16,
     textAlign: 'center',
   },
   welcomeSubtitle: {
-    fontSize: 18,
+    fontSize: 16,
+    lineHeight: 24,
     textAlign: 'center',
+    marginBottom: 32,
+  },
+  startButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#ffaa3a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  startButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
