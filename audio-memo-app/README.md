@@ -11,7 +11,8 @@ Eine vollständig ausgestattete iOS/Android App zur Audioaufnahme mit KI-gestüt
 - **CRUD-Funktionalität** (Create, Read, Update, Delete)
 - **Persistente Speicherung** aller Aufnahmen und Metadaten
 - **Audio-Player** mit Seekbar, Play/Pause, Skip ±15s
-- **Aufnahmen umbenennen** über intuitive Bottom Sheet Modals
+- **Aufnahmen umbenennen** über intuitive Bottom Sheet Modals mit Clear-Button
+- **Suche** in Aufnahmenamen und Transkript-Inhalten (Echtzeit-Filterung)
 - **Dark Mode Support** mit automatischer Theme-Erkennung
 
 #### 🤖 KI-Features (OpenAI Integration)
@@ -21,6 +22,9 @@ Eine vollständig ausgestattete iOS/Android App zur Audioaufnahme mit KI-gestüt
   - Optional: Auto-Transcribe nach Aufnahme
 - **AI Zusammenfassung** der Transkripte
 - **Custom AI Prompts** für individuelle Textverarbeitung
+  - **Prompt Library** mit 5 System-Templates
+  - **Eigene Prompts** erstellen, bearbeiten und verwalten
+  - Template-Auswahl über Dropdown in CustomPrompt Screen
 - **Retry-Mechanismus** bei Netzwerkfehlern
 
 #### 🌍 Internationalisierung (i18n)
@@ -95,7 +99,8 @@ audio-memo-app/
 ├── contexts/
 │   ├── ThemeContext.tsx            # Dark Mode State Management
 │   ├── SettingsContext.tsx         # App-Einstellungen
-│   └── LocalizationContext.tsx     # i18n State Management
+│   ├── LocalizationContext.tsx     # i18n State Management
+│   └── PromptTemplatesContext.tsx  # Prompt Library Management
 │
 ├── services/
 │   ├── transcriptionService.ts     # OpenAI Whisper Integration
@@ -500,6 +505,87 @@ eas build --platform ios --profile production
 - **OpenAI Quota**: Bei überschrittenem Quota erscheint Fehlermeldung
 - **Lange Aufnahmen**: Transkription kann >2 Minuten dauern
 - **Netzwerk**: Bei schlechter Verbindung Retry-Mechanismus nutzen
+
+## 🧑‍💻 Development Notes & Wichtige Learnings
+
+### Codebase-Architektur
+
+**Wichtig für zukünftige Entwicklung:**
+
+#### Rename Modal Locations
+Die App hat **zwei verschiedene Rename-Modals**:
+
+1. **RecordingItem.tsx** (`components/RecordingItem.tsx`)
+   - Modal in der **Liste** auf dem HomeScreen
+   - Wird verwendet wenn "Umbenennen" Button in der Aufnahme-Karte geklickt wird
+   - **Häufigster Use Case** ✅
+
+2. **PlayerScreen.tsx** (`screens/PlayerScreen.tsx`)
+   - Modal im **Player** Screen
+   - Wird verwendet beim Abspielen einer Aufnahme
+   - Selten verwendet
+
+**Lesson Learned:** Bei UI-Änderungen an Rename-Funktionalität **BEIDE Dateien** prüfen und updaten!
+
+#### Clear-Button Implementation
+Das Hinzufügen von Clear-Buttons in TextInput-Feldern:
+
+**Ansatz 1: Native `clearButtonMode` (iOS only)**
+```typescript
+<TextInput clearButtonMode="while-editing" />
+```
+- ❌ Funktioniert NICHT in Modals
+- ❌ Funktioniert NICHT mit Dark Mode
+- ❌ Nicht empfohlen
+
+**Ansatz 2: Absolute Positioning ✅**
+```typescript
+<View style={{ position: 'relative' }}>
+  <TextInput style={{ paddingRight: 40 }} />
+  <TouchableOpacity style={{ position: 'absolute', right: 12, top: 12 }}>
+    <Ionicons name="close-circle" />
+  </TouchableOpacity>
+</View>
+```
+- ✅ Funktioniert überall
+- ✅ Volle Kontrolle über Styling
+- ✅ Cross-Platform kompatibel
+
+#### Permission Handling
+Microphone-Berechtigung **VOR** Navigation zum RecordingScreen prüfen:
+
+```typescript
+// ✅ RICHTIG - in HomeScreen.tsx
+const handleStartRecording = async () => {
+  const { status } = await Audio.requestPermissionsAsync();
+  if (status === 'granted') {
+    navigation.navigate('Recording');
+  }
+};
+
+// ❌ FALSCH - in RecordingScreen.tsx
+useEffect(() => {
+  // Screen ist schon geöffnet, überdeckt Permission-Dialog!
+  requestPermission();
+}, []);
+```
+
+#### Hot Reload Issues
+Bei Änderungen die nicht sichtbar werden:
+
+1. **Expo Dev Server komplett neu starten**:
+```bash
+ps aux | grep "expo start" | grep -v grep | awk '{print $2}' | xargs kill -9
+npx expo start --clear
+```
+
+2. **App neu laden**: `r` im Terminal drücken
+
+3. **Bei hartnäckigen Problemen**:
+```bash
+rm -rf node_modules/.cache
+npx expo start --clear
+```
 
 ## 📊 Analytics & Monitoring
 
