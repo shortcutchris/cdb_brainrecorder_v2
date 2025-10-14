@@ -257,7 +257,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
                 onChangeText={setNewName}
                 placeholder={t('player.renamePlaceholder')}
                 placeholderTextColor={colors.textSecondary}
-                style={[styles.textInput, { borderColor: colors.border, color: colors.text }]}
+                style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]}
                 autoFocus
                 onSubmitEditing={handleRename}
               />
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 12,
     top: 12,
-    zIndex: 1,
+    zIndex: 10,
   },
   modalButtonContainer: {
     flexDirection: 'row',

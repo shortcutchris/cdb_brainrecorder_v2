@@ -9,6 +9,8 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -196,10 +198,14 @@ export default function PromptLibraryScreen({ navigation }: Props) {
           style={styles.modalOverlay}
           onPress={() => setShowModal(false)}
         >
-          <Pressable
-            style={[styles.modalContent, { backgroundColor: colors.card }]}
-            onPress={(e) => e.stopPropagation()}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoidingView}
           >
+            <Pressable
+              style={[styles.modalContent, { backgroundColor: colors.card }]}
+              onPress={(e) => e.stopPropagation()}
+            >
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               {editingTemplate
                 ? t('screens:promptLibrary.editTemplate')
@@ -258,6 +264,7 @@ export default function PromptLibraryScreen({ navigation }: Props) {
               </TouchableOpacity>
             </View>
           </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </View>
@@ -362,6 +369,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  keyboardAvoidingView: {
+    width: '100%',
+    maxWidth: 400,
   },
   modalContent: {
     borderRadius: 16,
