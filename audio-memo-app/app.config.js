@@ -5,7 +5,7 @@ export default {
   expo: {
     name: 'CDB BrainRecorder',
     slug: 'audio-memo-app',
-    version: '1.1.0',
+    version: '1.2.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'automatic',
@@ -18,7 +18,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.cdb.brainrecorder',
-      buildNumber: '9',
+      buildNumber: '10',
       infoPlist: {
         NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
         UIBackgroundModes: ['audio'],
