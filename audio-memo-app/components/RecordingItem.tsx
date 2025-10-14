@@ -217,15 +217,26 @@ export default function RecordingItem({
           >
             <Text style={[styles.modalTitle, { color: colors.text }]}>{t('common:recordingItem.renameTitle')}</Text>
 
-            <TextInput
-              value={newName}
-              onChangeText={setNewName}
-              placeholder={t('common:recordingItem.renamePlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.textInput, { borderColor: colors.border, color: colors.text }]}
-              autoFocus
-              onSubmitEditing={handleRename}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={newName}
+                onChangeText={setNewName}
+                placeholder={t('common:recordingItem.renamePlaceholder')}
+                placeholderTextColor={colors.textSecondary}
+                style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]}
+                autoFocus
+                onSubmitEditing={handleRename}
+              />
+              {newName.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setNewName('')}
+                  style={styles.clearButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
 
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
@@ -477,12 +488,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 16,
   },
+  inputContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
   textInput: {
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
-    marginBottom: 16,
+    paddingRight: 40,
     fontSize: 16,
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
   },
   modalButtonContainer: {
     flexDirection: 'row',
