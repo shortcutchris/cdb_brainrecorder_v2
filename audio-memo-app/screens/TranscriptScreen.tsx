@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Share,
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -43,6 +44,18 @@ export default function TranscriptScreen({ route, navigation }: Props) {
     if (recording?.transcript?.text) {
       await Clipboard.setStringAsync(recording.transcript.text);
       Alert.alert(t('transcript.copiedTitle'), t('transcript.copiedMessage'));
+    }
+  };
+
+  const handleShare = async () => {
+    if (recording?.transcript?.text) {
+      try {
+        await Share.share({
+          message: recording.transcript.text,
+        });
+      } catch (error) {
+        // User cancelled or error occurred
+      }
     }
   };
 
@@ -157,6 +170,16 @@ export default function TranscriptScreen({ route, navigation }: Props) {
               <Ionicons name="copy-outline" size={20} color={colors.text} />
               <Text style={[styles.actionButtonText, { color: colors.text }]}>
                 {t('transcript.copyButton')}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleShare}
+              style={[styles.actionButton, { backgroundColor: colors.card }]}
+            >
+              <Ionicons name="share-outline" size={20} color={colors.text} />
+              <Text style={[styles.actionButtonText, { color: colors.text }]}>
+                {t('common:buttons.share')}
               </Text>
             </TouchableOpacity>
 

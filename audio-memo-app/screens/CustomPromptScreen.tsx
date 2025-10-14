@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  Share,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -104,6 +105,16 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
     Alert.alert(t('common:alerts.copied'), t('common:alerts.copiedToClipboard'));
   };
 
+  const handleShareResult = async (text: string) => {
+    try {
+      await Share.share({
+        message: text,
+      });
+    } catch (error) {
+      // User cancelled or error occurred
+    }
+  };
+
   if (!recording) {
     return null;
   }
@@ -146,6 +157,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
                   result={result}
                   colors={colors}
                   onCopy={handleCopyResult}
+                  onShare={handleShareResult}
                   t={t}
                 />
               ))}
@@ -263,11 +275,13 @@ function ResultCard({
   result,
   colors,
   onCopy,
+  onShare,
   t,
 }: {
   result: AiResult;
   colors: any;
   onCopy: (text: string) => void;
+  onShare: (text: string) => void;
   t: any;
 }) {
   const isProcessing = result.status === 'processing';
@@ -299,13 +313,22 @@ function ResultCard({
           <Text style={[styles.resultText, { color: colors.text }]}>
             {result.text}
           </Text>
-          <TouchableOpacity
-            onPress={() => onCopy(result.text)}
-            style={[styles.copyButton, { backgroundColor: colors.textSecondary }]}
-          >
-            <Ionicons name="copy-outline" size={16} color="#FFFFFF" />
-            <Text style={styles.copyButtonText}>{t('common:buttons.copy')}</Text>
-          </TouchableOpacity>
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity
+              onPress={() => onCopy(result.text)}
+              style={[styles.copyButton, { backgroundColor: colors.textSecondary }]}
+            >
+              <Ionicons name="copy-outline" size={16} color="#FFFFFF" />
+              <Text style={styles.copyButtonText}>{t('common:buttons.copy')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onShare(result.text)}
+              style={[styles.copyButton, { backgroundColor: colors.textSecondary }]}
+            >
+              <Ionicons name="share-outline" size={16} color="#FFFFFF" />
+              <Text style={styles.copyButtonText}>{t('common:buttons.share')}</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
 
@@ -387,6 +410,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 12,
   },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   copyButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -394,7 +421,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    alignSelf: 'flex-start',
     gap: 6,
   },
   copyButtonText: {

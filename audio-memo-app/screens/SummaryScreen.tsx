@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  Share,
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -93,6 +94,18 @@ export default function SummaryScreen({ route, navigation }: Props) {
     if (recording?.summary?.text) {
       await Clipboard.setStringAsync(recording.summary.text);
       Alert.alert(t('common:alerts.copied'), t('common:alerts.summaryClipboard'));
+    }
+  };
+
+  const handleShare = async () => {
+    if (recording?.summary?.text) {
+      try {
+        await Share.share({
+          message: recording.summary.text,
+        });
+      } catch (error) {
+        // User cancelled or error occurred
+      }
     }
   };
 
@@ -214,6 +227,14 @@ export default function SummaryScreen({ route, navigation }: Props) {
               >
                 <Ionicons name="copy-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.actionButtonText}>{t('common:buttons.copy')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleShare}
+                style={[styles.actionButton, { backgroundColor: colors.textSecondary }]}
+              >
+                <Ionicons name="share-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={styles.actionButtonText}>{t('common:buttons.share')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
