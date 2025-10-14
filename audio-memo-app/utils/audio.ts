@@ -26,10 +26,14 @@ export async function startRecording(): Promise<Audio.Recording | null> {
       throw new Error('Microphone permission not granted');
     }
 
-    // Configure audio mode
+    // Configure audio mode for background recording
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
+      staysActiveInBackground: true, // Keep recording active when app goes to background
+      interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
+      interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
+      shouldDuckAndroid: false,
     });
 
     // Start recording
@@ -53,9 +57,12 @@ export async function stopRecording(
   label: string = 'Aufnahme'
 ): Promise<Recording | null> {
   try {
+    console.log('🔴 stopRecording called at:', new Date().toISOString());
+
     await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
+      staysActiveInBackground: false, // Disable background mode when recording stops
     });
 
     const uri = recording.getURI();
@@ -66,6 +73,8 @@ export async function stopRecording(
     // Get recording duration
     const status = await recording.getStatusAsync();
     const duration = status.isLoaded ? status.durationMillis / 1000 : 0;
+
+    console.log('📊 Recording duration:', duration, 'seconds');
 
     // Generate unique ID and filename
     const id = Date.now().toString();

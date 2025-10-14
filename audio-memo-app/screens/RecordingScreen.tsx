@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform, AppState } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,13 +21,21 @@ export default function RecordingScreen({ navigation }: Props) {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [duration, setDuration] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const appState = useRef(AppState.currentState);
 
+  // Initialize recording on mount
   useEffect(() => {
+    console.log('✅ RecordingScreen mounted');
     initRecording();
     return () => {
-      // Cleanup
-      if (recording) {
-        recording.stopAndUnloadAsync();
+      console.log('❌ RecordingScreen unmounting');
+      // IMPROVED CLEANUP: Only stop recording if explicitly not recording anymore
+      // This prevents accidental stops when screen briefly unmounts/remounts
+      if (recording && !isRecording) {
+        console.log('🧹 Cleanup: Stopping inactive recording');
+        recording.stopAndUnloadAsync().catch(err => console.error('Cleanup error:', err));
+      } else if (recording && isRecording) {
+        console.log('⚠️ Warning: Recording still active during unmount - keeping it alive');
       }
     };
   }, []);
@@ -43,12 +51,34 @@ export default function RecordingScreen({ navigation }: Props) {
     return () => clearInterval(interval);
   }, [isRecording]);
 
+  // Monitor App State changes (Background/Foreground)
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('📱 App has come to the foreground');
+      } else if (nextAppState.match(/inactive|background/)) {
+        console.log('🌙 App has gone to the background - Recording:', isRecording ? 'CONTINUES' : 'N/A');
+        if (isRecording) {
+          console.log('⏱️ Current duration:', duration, 'seconds');
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [isRecording, duration]);
+
   const initRecording = async () => {
+    console.log('🎙️ Initializing recording...');
     const newRecording = await startRecording();
     if (newRecording) {
       setRecording(newRecording);
       setIsRecording(true);
+      console.log('✅ Recording started successfully');
     } else {
+      console.log('❌ Recording failed to start');
       Alert.alert(
         t('recording.errorTitle'),
         t('recording.microphonePermissionDenied'),
