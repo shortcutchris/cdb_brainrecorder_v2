@@ -54,8 +54,8 @@ export async function transcribeAudio(
     // Set model
     formData.append('model', 'whisper-1');
 
-    // Optional: Set language to German (or auto-detect by omitting)
-    formData.append('language', 'de');
+    // Language auto-detection: Don't specify language, let Whisper detect it automatically
+    // This allows transcription in any language (English, German, Spanish, etc.)
 
     // Make API request
     const response = await fetch(OPENAI_API_URL, {
