@@ -251,16 +251,26 @@ export default function PlayerScreen({ route, navigation }: Props) {
               {t('player.renameTitle')}
             </Text>
 
-            <TextInput
-              value={newName}
-              onChangeText={setNewName}
-              placeholder={t('player.renamePlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.textInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]}
-              autoFocus
-              onSubmitEditing={handleRename}
-              clearButtonMode="while-editing"
-            />
+            <View style={[styles.inputRow, { borderColor: colors.border, backgroundColor: colors.background }]}>
+              <TextInput
+                value={newName}
+                onChangeText={setNewName}
+                placeholder={t('player.renamePlaceholder')}
+                placeholderTextColor={colors.textSecondary}
+                style={[styles.textInput, { color: colors.text }]}
+                autoFocus
+                onSubmitEditing={handleRename}
+              />
+              {newName.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setNewName('')}
+                  style={styles.clearButton}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
 
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
@@ -413,12 +423,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 16,
   },
-  textInput: {
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  textInput: {
+    flex: 1,
     padding: 12,
     fontSize: 16,
-    marginBottom: 16,
+  },
+  clearButton: {
+    padding: 4,
+    marginLeft: 8,
   },
   modalButtonContainer: {
     flexDirection: 'row',
