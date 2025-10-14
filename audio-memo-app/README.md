@@ -8,6 +8,7 @@ Eine vollständig ausgestattete iOS/Android App zur Audioaufnahme mit KI-gestüt
 
 #### 🎙 Aufnahme & Verwaltung
 - **Hochqualitative Audioaufnahmen** direkt vom Mikrofon
+- **Background Recording** - Aufnahmen laufen im Hintergrund weiter (>2 Minuten) 🎉
 - **CRUD-Funktionalität** (Create, Read, Update, Delete)
 - **Persistente Speicherung** aller Aufnahmen und Metadaten
 - **Audio-Player** mit Seekbar, Play/Pause, Skip ±15s
@@ -51,7 +52,7 @@ Eine vollständig ausgestattete iOS/Android App zur Audioaufnahme mit KI-gestüt
 - **Framework**: React Native + Expo SDK 54
 - **Sprache**: TypeScript
 - **Navigation**: React Navigation (Native Stack)
-- **Audio**: expo-av (Recording & Playback)
+- **Audio**: expo-audio (Hooks-basiert, ersetzt expo-av) 🆕
 - **Storage**:
   - AsyncStorage (Metadaten, Settings)
   - expo-file-system (Audio-Dateien)
@@ -73,6 +74,100 @@ Eine vollständig ausgestattete iOS/Android App zur Audioaufnahme mit KI-gestüt
 - **TestFlight** (iOS Beta Distribution)
 - **App Store Connect** (Apple Distribution)
 
+## 🎵 Audio-Architektur (expo-audio)
+
+### Migration zu expo-audio (Build 18)
+
+Die App wurde von `expo-av` (deprecated) zu `expo-audio` migriert, um **Background Recording >2 Minuten** zu ermöglichen.
+
+### Hook-basierte API
+
+**Recording** (`RecordingScreen.tsx`):
+```typescript
+import { useAudioRecorder, useAudioRecorderState, RecordingPresets } from 'expo-audio';
+
+// Recorder Hook erstellen
+const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+const recorderState = useAudioRecorderState(recorder);
+
+// Status direkt verfügbar (synchron)
+const duration = Math.floor(recorderState.durationMillis / 1000);
+const isRecording = recorderState.isRecording;
+
+// Recording starten
+await recorder.prepareToRecordAsync();
+recorder.record();
+
+// Recording stoppen
+await recorder.stop();
+const uri = recorder.uri; // Aufnahme-Pfad
+```
+
+**Playback** (`PlayerScreen.tsx`):
+```typescript
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+
+// Player Hook erstellen
+const player = useAudioPlayer({ uri: recording.uri });
+const status = useAudioPlayerStatus(player);
+
+// Status direkt verfügbar (synchron)
+const isPlaying = status.playing;
+const position = Math.floor(status.currentTime);
+const duration = Math.floor(status.duration);
+
+// Abspielen (synchron, kein await)
+player.play();
+player.pause();
+player.seekTo(seconds);
+```
+
+### Background Recording
+
+**Konfiguration** (`RecordingScreen.tsx`):
+```typescript
+await setAudioModeAsync({
+  playsInSilentMode: true,
+  allowsRecording: true,
+  shouldPlayInBackground: true, // ⭐ KEY für Background Recording!
+  interruptionMode: 'duckOthers',
+});
+```
+
+**app.config.js**:
+```javascript
+ios: {
+  infoPlist: {
+    UIBackgroundModes: ['audio'], // iOS Background Mode
+  },
+},
+plugins: [
+  'expo-audio' // Expo Audio Plugin
+],
+```
+
+### Wichtiger Hinweis: Expo Go Limitation
+
+⚠️ **Background Recording funktioniert NICHT in Expo Go** (Development-Modus)!
+
+Das ist eine Plattform-Limitation. Background Recording funktioniert nur in:
+- **Standalone Builds** (TestFlight)
+- **App Store Builds**
+
+Im Development-Modus stoppt die Aufnahme nach ca. 2 Minuten im Hintergrund.
+
+### Key Differences: expo-av vs expo-audio
+
+| Feature | expo-av (alt) | expo-audio (neu) |
+|---------|--------------|------------------|
+| **API Style** | Imperative (Klassen) | Declarative (Hooks) |
+| **Recording** | `new Audio.Recording()` | `useAudioRecorder()` |
+| **Playback** | `Audio.Sound.createAsync()` | `useAudioPlayer()` |
+| **Status** | `await getStatusAsync()` | `useAudioRecorderState()` |
+| **Lifecycle** | Manuelles `unloadAsync()` | Automatisch (Hook cleanup) |
+| **Background** | Limitiert (~2 min) | Unbegrenzt ✅ |
+| **Platform Support** | iOS, Android, Web | iOS, Android, Web |
+
 ## 📁 Projektstruktur
 
 ```
@@ -82,8 +177,8 @@ audio-memo-app/
 │
 ├── screens/
 │   ├── HomeScreen.tsx              # Aufnahmen-Liste + Empty State
-│   ├── RecordingScreen.tsx         # Aufnahme-Ansicht
-│   ├── PlayerScreen.tsx            # Audio-Wiedergabe
+│   ├── RecordingScreen.tsx         # Aufnahme-Ansicht (expo-audio)
+│   ├── PlayerScreen.tsx            # Audio-Wiedergabe (expo-audio)
 │   ├── TranscriptScreen.tsx        # Transkript-Anzeige
 │   ├── SummaryScreen.tsx           # AI-Zusammenfassung
 │   ├── CustomPromptScreen.tsx      # Custom AI Prompt
@@ -107,7 +202,8 @@ audio-memo-app/
 │   └── aiService.ts                # OpenAI GPT Integration
 │
 ├── utils/
-│   └── audio.ts                    # Audio Recording & Playback Utils
+│   └── audio.ts                    # Audio Helper Functions
+│                                   # (formatDuration, formatDate)
 │
 ├── types/
 │   └── index.ts                    # TypeScript Interfaces
@@ -123,13 +219,19 @@ audio-memo-app/
 │       ├── common.json             # Gemeinsame EN-Übersetzungen
 │       └── screens.json            # Screen-spezifische EN-Übersetzungen
 │
+├── ai/
+│   ├── docs/
+│   │   └── expo_audio.md           # expo-audio API Dokumentation
+│   ├── features/                   # Feature-Spezifikationen
+│   └── migration_plan_expo_audio.md # expo-audio Migration Plan
+│
 ├── assets/
 │   ├── icon.png                    # App Icon (1024x1024)
 │   ├── adaptive_icon.png           # Android Adaptive Icon
 │   ├── splash-icon.png             # Splash Screen
 │   └── logo.png                    # App Logo (Empty State)
 │
-├── app.config.js                   # Expo App Konfiguration
+├── app.config.js                   # Expo App Konfiguration (Dynamic)
 ├── eas.json                        # EAS Build Konfiguration
 ├── .env                            # Environment Variables (OpenAI Key)
 └── package.json                    # Dependencies
@@ -235,6 +337,8 @@ npx expo start
 - `a` - Android Emulator
 - QR-Code scannen für physisches Gerät (Expo Go App)
 
+**Hinweis:** Background Recording funktioniert nicht in Expo Go! Für Tests einen TestFlight Build verwenden.
+
 ## 🚀 Deployment (iOS TestFlight)
 
 ### Übersicht
@@ -261,6 +365,12 @@ Dies erstellt ein EAS-Projekt und fügt die Project ID zur `app.config.js` hinzu
 
 ```bash
 eas build --platform ios --profile production --auto-submit
+```
+
+**Optional: Mit Release Notes**
+```bash
+eas build --platform ios --profile production --auto-submit \
+  --message "Build 18 - expo-audio migration for background recording >2min"
 ```
 
 **Was passiert:**
@@ -300,19 +410,14 @@ Nach dem ersten Build:
 
 In `app.config.js`:
 ```javascript
-buildNumber: '2',  // Vorher: '1'
+buildNumber: '19',  // Vorher: '18'
 ```
 
 #### 2. Neuen Build erstellen
 
 ```bash
-eas build --platform ios --profile production --auto-submit
-```
-
-**Optional: Release Notes hinzufügen**
-```bash
 eas build --platform ios --profile production --auto-submit \
-  --message "Fixed transcription bug, added dark mode support"
+  --message "Build 19 - Fixed XYZ, added ABC feature"
 ```
 
 #### 3. Automatische Updates
@@ -354,11 +459,15 @@ eas build --platform ios --profile production
 {
   name: 'CDB BrainRecorder',
   bundleIdentifier: 'com.cdb.brainrecorder',
-  version: '1.0.0',
+  version: '1.2.0',
+  plugins: [
+    'expo-audio' // expo-audio Plugin
+  ],
   ios: {
-    buildNumber: '1',
+    buildNumber: '18',
     infoPlist: {
       NSMicrophoneUsageDescription: '...',
+      UIBackgroundModes: ['audio'], // Background Recording
       ITSAppUsesNonExemptEncryption: false,
     },
   },
@@ -444,30 +553,37 @@ eas build --platform ios --profile production
 - Stoppe Aufnahme
 - ✅ Aufnahme erscheint in Liste
 
-#### 2. Wiedergabe
+#### 2. Background Recording (TestFlight only!)
+- Starte Aufnahme
+- App in Hintergrund schicken (Home Button)
+- Warte >2 Minuten
+- App wieder öffnen
+- ✅ Aufnahme läuft weiter
+
+#### 3. Wiedergabe
 - Tippe auf Aufnahme
 - Play/Pause funktioniert
 - Seekbar funktioniert
 - Skip ±15s funktioniert
 
-#### 3. Transkription
+#### 4. Transkription
 - Tippe auf ⋮ Menü → "Transkript"
 - ✅ Status: "Wird verarbeitet..."
 - Warte 30-60 Sekunden
 - ✅ Status: "Fertig" → Transkript anzeigen
 
-#### 4. AI-Zusammenfassung
+#### 5. AI-Zusammenfassung
 - Nach erfolgreicher Transkription
 - ⋮ Menü → "AI Zusammenfassung"
 - ✅ Zusammenfassung wird generiert
 
-#### 5. Internationalisierung
+#### 6. Internationalisierung
 - Settings → "App-Sprache" → English
 - ✅ Alle Texte auf Englisch
 - Neue Aufnahme erstellen
 - ✅ Name: "Recording 10/14 3:30 PM"
 
-#### 6. Dark Mode
+#### 7. Dark Mode
 - Settings → "Theme" → Dark
 - ✅ Dark Theme aktiviert
 - Settings → "Theme" → Automatisch
@@ -505,12 +621,39 @@ eas build --platform ios --profile production
 - **OpenAI Quota**: Bei überschrittenem Quota erscheint Fehlermeldung
 - **Lange Aufnahmen**: Transkription kann >2 Minuten dauern
 - **Netzwerk**: Bei schlechter Verbindung Retry-Mechanismus nutzen
+- **Background Recording**: Funktioniert NICHT in Expo Go (nur TestFlight/App Store)
 
 ## 🧑‍💻 Development Notes & Wichtige Learnings
 
 ### Codebase-Architektur
 
 **Wichtig für zukünftige Entwicklung:**
+
+#### expo-audio Migration (Build 18)
+
+**Hybrid-Ansatz:**
+- Recording-Logik direkt in `RecordingScreen.tsx` (Hooks)
+- Playback-Logik direkt in `PlayerScreen.tsx` (Hooks)
+- `utils/audio.ts` enthält nur Helper-Funktionen
+- Keine Wrapper-Funktionen mehr nötig
+
+**Warum?**
+- `utils/audio.ts` ist kein React Component → kann keine Hooks nutzen
+- Hooks müssen in React Components verwendet werden
+- Lifecycle Management automatisch durch React
+
+**Key Changes:**
+```typescript
+// ❌ Alt (expo-av) - in utils/audio.ts
+export async function startRecording() {
+  const recording = await Audio.Recording.createAsync(...);
+  return recording;
+}
+
+// ✅ Neu (expo-audio) - direkt in RecordingScreen.tsx
+const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+const recorderState = useAudioRecorderState(recorder);
+```
 
 #### Rename Modal Locations
 Die App hat **zwei verschiedene Rename-Modals**:
@@ -557,8 +700,8 @@ Microphone-Berechtigung **VOR** Navigation zum RecordingScreen prüfen:
 ```typescript
 // ✅ RICHTIG - in HomeScreen.tsx
 const handleStartRecording = async () => {
-  const { status } = await Audio.requestPermissionsAsync();
-  if (status === 'granted') {
+  const { granted } = await requestRecordingPermissionsAsync();
+  if (granted) {
     navigation.navigate('Recording');
   }
 };
@@ -569,6 +712,22 @@ useEffect(() => {
   requestPermission();
 }, []);
 ```
+
+#### Background Recording Debugging
+
+**Problem:** Aufnahme stoppt nach ~2 Minuten im Hintergrund
+
+**Root Cause:** Expo Go Limitation - Background Audio funktioniert nicht in Development
+
+**Solution:**
+1. TestFlight Build erstellen
+2. Auf physischem Device testen
+3. Background Recording funktioniert in standalone builds
+
+**Konfiguration:**
+- `shouldPlayInBackground: true` in `setAudioModeAsync()`
+- `UIBackgroundModes: ['audio']` in `app.config.js`
+- `expo-audio` Plugin in `app.config.js`
 
 #### Hot Reload Issues
 Bei Änderungen die nicht sichtbar werden:
@@ -623,9 +782,29 @@ Proprietary - CDB (Hans Christian Hubmann)
 
 ---
 
-**Version**: 1.0.0
-**Build**: 1
+**Version**: 1.2.0
+**Build**: 18
 **Letztes Update**: 14. Oktober 2025
 **Bundle ID**: com.cdb.brainrecorder
 **ASC App ID**: 6753975262
 **EAS Project ID**: b2803f18-2a5a-41cd-a82e-5f4751bbf73c
+
+## 📝 Changelog
+
+### Build 18 (14.10.2025) - expo-audio Migration
+- ✨ **Background Recording Support** - Aufnahmen laufen unbegrenzt im Hintergrund
+- 🔄 **Migrated from expo-av to expo-audio** - Moderne Hook-basierte Audio API
+- ⚡ **Performance Improvements** - Automatisches Lifecycle Management
+- 📚 **Documentation** - Comprehensive migration guide in `ai/migration_plan_expo_audio.md`
+
+### Build 17 (13.10.2025)
+- 🔍 **Search Feature** - Search in recording names and transcripts
+- 🎨 **X-Button in Textfields** - Clear button in all text inputs
+- 🌍 **Custom Prompts Library** - 5 system templates + custom prompts
+
+### Build 1-16
+- Initial releases with core features
+- AI integration (Whisper, GPT-4)
+- i18n support (DE/EN)
+- Dark mode
+- Settings screen
