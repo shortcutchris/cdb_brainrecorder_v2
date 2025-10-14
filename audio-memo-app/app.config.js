@@ -22,6 +22,7 @@ export default {
       infoPlist: {
         NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
         UIBackgroundModes: ['audio'],
+        ITSAppUsesNonExemptEncryption: false,
       },
     },
     android: {
