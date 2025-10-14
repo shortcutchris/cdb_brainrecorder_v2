@@ -8,11 +8,13 @@ import {
   TextInput,
   StyleSheet,
   Image,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Audio } from 'expo-av';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -79,8 +81,28 @@ export default function HomeScreen({ navigation }: Props) {
     navigation.navigate('CustomPrompt', { recordingId });
   };
 
-  const handleStartRecording = () => {
-    navigation.navigate('Recording');
+  const handleStartRecording = async () => {
+    try {
+      // Check and request microphone permission BEFORE navigating
+      const { status } = await Audio.requestPermissionsAsync();
+
+      if (status === 'granted') {
+        // Permission granted, navigate to recording screen
+        navigation.navigate('Recording');
+      } else {
+        // Permission denied, show alert
+        Alert.alert(
+          t('recording.errorTitle'),
+          t('recording.microphonePermissionDenied')
+        );
+      }
+    } catch (error) {
+      console.error('Error requesting microphone permission:', error);
+      Alert.alert(
+        t('recording.errorTitle'),
+        t('recording.microphonePermissionDenied')
+      );
+    }
   };
 
   if (loading) {
