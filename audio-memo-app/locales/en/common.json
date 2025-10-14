@@ -27,5 +27,28 @@
     "copied": "Copied",
     "success": "Success",
     "confirm": "Confirm"
+  },
+  "recordingItem": {
+    "play": "Play",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteConfirm": "⚠️ Delete recording?",
+    "deleteMessage": "really delete?\n\nThis action cannot be undone.",
+    "renameTitle": "Rename",
+    "renamePlaceholder": "Recording name",
+    "transcriptProcessing": "Transcription in progress...",
+    "pleaseWait": "Please wait",
+    "transcript": "Transcript",
+    "viewTranscript": "View transcript",
+    "convertAudioToText": "Convert audio to text",
+    "aiSummary": "AI Summary",
+    "automaticSummary": "Automatic summary",
+    "waitingForTranscript": "Waiting for transcript...",
+    "transcriptRequired": "Transcript required",
+    "aiCustomPrompt": "AI Custom Prompt",
+    "executeCustomInstructions": "Execute custom instructions",
+    "transcriptNeededTitle": "Transcript required",
+    "waitForTranscription": "Please wait until transcription is complete.",
+    "createTranscriptFirst": "Please create a transcript first."
   }
 }

@@ -27,5 +27,28 @@
     "copied": "Kopiert",
     "success": "Erfolgreich",
     "confirm": "Bestätigen"
+  },
+  "recordingItem": {
+    "play": "Play",
+    "rename": "Umbenennen",
+    "delete": "Löschen",
+    "deleteConfirm": "⚠️ Aufnahme löschen?",
+    "deleteMessage": "wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "renameTitle": "Umbenennen",
+    "renamePlaceholder": "Name der Aufnahme",
+    "transcriptProcessing": "Transkription läuft...",
+    "pleaseWait": "Bitte warten",
+    "transcript": "Transkript",
+    "viewTranscript": "Transkript anzeigen",
+    "convertAudioToText": "Audio zu Text konvertieren",
+    "aiSummary": "AI Zusammenfassung",
+    "automaticSummary": "Automatische Zusammenfassung",
+    "waitingForTranscript": "Warte auf Transkript...",
+    "transcriptRequired": "Transkript benötigt",
+    "aiCustomPrompt": "AI Custom Prompt",
+    "executeCustomInstructions": "Eigene Anweisungen ausführen",
+    "transcriptNeededTitle": "Transkript benötigt",
+    "waitForTranscription": "Bitte warte, bis die Transkription abgeschlossen ist.",
+    "createTranscriptFirst": "Bitte erstelle zuerst ein Transkript dieser Aufnahme."
   }
 }

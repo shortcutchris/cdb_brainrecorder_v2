@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Recording } from '../types';
 import { formatDate, formatDuration } from '../utils/audio';
 import { useTheme } from '../contexts/ThemeContext';
@@ -34,6 +35,7 @@ export default function RecordingItem({
   onSummary,
   onCustomPrompt,
 }: RecordingItemProps) {
+  const { t } = useTranslation();
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [newName, setNewName] = useState(recording.name);
@@ -77,15 +79,15 @@ export default function RecordingItem({
 
   const handleDelete = () => {
     Alert.alert(
-      '⚠️ Aufnahme löschen?',
-      `"${recording.name}" wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`,
+      t('common:recordingItem.deleteConfirm'),
+      t('common:recordingItem.deleteMessage', { name: recording.name }),
       [
         {
-          text: 'Abbrechen',
+          text: t('common:buttons.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Löschen',
+          text: t('common:recordingItem.delete'),
           style: 'destructive',
           onPress: () => onDelete(recording.id),
         },
@@ -174,7 +176,7 @@ export default function RecordingItem({
             style={[styles.playButton, { backgroundColor: colors.primary }]}
           >
             <Ionicons name="play" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.buttonText}>Play</Text>
+            <Text style={styles.buttonText}>{t('common:recordingItem.play')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -185,7 +187,7 @@ export default function RecordingItem({
             style={[styles.renameButton, { backgroundColor: colors.textSecondary }]}
           >
             <Ionicons name="create-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.buttonText}>Umbenennen</Text>
+            <Text style={styles.buttonText}>{t('common:recordingItem.rename')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -193,7 +195,7 @@ export default function RecordingItem({
             style={[styles.deleteButton, { backgroundColor: colors.danger }]}
           >
             <Ionicons name="trash-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.buttonText}>Löschen</Text>
+            <Text style={styles.buttonText}>{t('common:recordingItem.delete')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -213,12 +215,12 @@ export default function RecordingItem({
             style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Umbenennen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('common:recordingItem.renameTitle')}</Text>
 
             <TextInput
               value={newName}
               onChangeText={setNewName}
-              placeholder="Name der Aufnahme"
+              placeholder={t('common:recordingItem.renamePlaceholder')}
               placeholderTextColor={colors.textSecondary}
               style={[styles.textInput, { borderColor: colors.border, color: colors.text }]}
               autoFocus
@@ -230,14 +232,14 @@ export default function RecordingItem({
                 onPress={() => setShowRenameModal(false)}
                 style={styles.cancelButton}
               >
-                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Abbrechen</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>{t('common:buttons.cancel')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleRename}
                 style={[styles.saveButton, { backgroundColor: colors.primary }]}
               >
-                <Text style={styles.buttonText}>Speichern</Text>
+                <Text style={styles.buttonText}>{t('common:buttons.save')}</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -265,10 +267,10 @@ export default function RecordingItem({
                 <Ionicons name="hourglass-outline" size={24} color={colors.textSecondary} />
                 <View style={styles.menuItemTextContainer}>
                   <Text style={[styles.menuItemTitle, { color: colors.textSecondary }]}>
-                    Transkription läuft...
+                    {t('common:recordingItem.transcriptProcessing')}
                   </Text>
                   <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                    Bitte warten
+                    {t('common:recordingItem.pleaseWait')}
                   </Text>
                 </View>
               </View>
@@ -286,11 +288,11 @@ export default function RecordingItem({
                   color={recording.transcript?.status === 'completed' ? colors.success : colors.primary}
                 />
                 <View style={styles.menuItemTextContainer}>
-                  <Text style={[styles.menuItemTitle, { color: colors.text }]}>Transkript</Text>
+                  <Text style={[styles.menuItemTitle, { color: colors.text }]}>{t('common:recordingItem.transcript')}</Text>
                   <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
                     {recording.transcript?.status === 'completed'
-                      ? 'Transkript anzeigen'
-                      : 'Audio zu Text konvertieren'}
+                      ? t('common:recordingItem.viewTranscript')
+                      : t('common:recordingItem.convertAudioToText')}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -306,10 +308,10 @@ export default function RecordingItem({
                   onSummary(recording.id);
                 } else {
                   Alert.alert(
-                    'Transkript benötigt',
+                    t('common:recordingItem.transcriptNeededTitle'),
                     recording.transcript?.status === 'processing'
-                      ? 'Bitte warte, bis die Transkription abgeschlossen ist.'
-                      : 'Bitte erstelle zuerst ein Transkript dieser Aufnahme.'
+                      ? t('common:recordingItem.waitForTranscription')
+                      : t('common:recordingItem.createTranscriptFirst')
                   );
                 }
               }}
@@ -325,14 +327,14 @@ export default function RecordingItem({
                   styles.menuItemTitle,
                   { color: recording.transcript?.status === 'completed' ? colors.text : colors.textSecondary }
                 ]}>
-                  AI Zusammenfassung
+                  {t('common:recordingItem.aiSummary')}
                 </Text>
                 <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
                   {recording.transcript?.status === 'completed'
-                    ? 'Automatische Zusammenfassung'
+                    ? t('common:recordingItem.automaticSummary')
                     : recording.transcript?.status === 'processing'
-                    ? 'Warte auf Transkript...'
-                    : 'Transkript benötigt'}
+                    ? t('common:recordingItem.waitingForTranscript')
+                    : t('common:recordingItem.transcriptRequired')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -347,10 +349,10 @@ export default function RecordingItem({
                   onCustomPrompt(recording.id);
                 } else {
                   Alert.alert(
-                    'Transkript benötigt',
+                    t('common:recordingItem.transcriptNeededTitle'),
                     recording.transcript?.status === 'processing'
-                      ? 'Bitte warte, bis die Transkription abgeschlossen ist.'
-                      : 'Bitte erstelle zuerst ein Transkript dieser Aufnahme.'
+                      ? t('common:recordingItem.waitForTranscription')
+                      : t('common:recordingItem.createTranscriptFirst')
                   );
                 }
               }}
@@ -366,14 +368,14 @@ export default function RecordingItem({
                   styles.menuItemTitle,
                   { color: recording.transcript?.status === 'completed' ? colors.text : colors.textSecondary }
                 ]}>
-                  AI Custom Prompt
+                  {t('common:recordingItem.aiCustomPrompt')}
                 </Text>
                 <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
                   {recording.transcript?.status === 'completed'
-                    ? 'Eigene Anweisungen ausführen'
+                    ? t('common:recordingItem.executeCustomInstructions')
                     : recording.transcript?.status === 'processing'
-                    ? 'Warte auf Transkript...'
-                    : 'Transkript benötigt'}
+                    ? t('common:recordingItem.waitingForTranscript')
+                    : t('common:recordingItem.transcriptRequired')}
                 </Text>
               </View>
             </TouchableOpacity>
