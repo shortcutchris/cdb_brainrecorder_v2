@@ -20,30 +20,39 @@ export async function requestMicrophonePermission(): Promise<boolean> {
  */
 export async function startRecording(): Promise<Audio.Recording | null> {
   try {
+    console.log('🎤 startRecording: Requesting permission...');
+
     // Request permission
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
+      console.error('❌ startRecording: Permission denied by user');
       throw new Error('Microphone permission not granted');
     }
 
+    console.log('✅ startRecording: Permission granted');
+
+    console.log('⚙️ startRecording: Configuring audio mode...');
     // Configure audio mode for background recording
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
       staysActiveInBackground: true, // Keep recording active when app goes to background
-      interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
-      interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
       shouldDuckAndroid: false,
     });
 
+    console.log('✅ startRecording: Audio mode configured');
+
+    console.log('🎙️ startRecording: Creating recording...');
     // Start recording
     const { recording } = await Audio.Recording.createAsync(
       Audio.RecordingOptionsPresets.HIGH_QUALITY
     );
 
+    console.log('✅ startRecording: Recording created successfully');
     return recording;
   } catch (error) {
-    console.error('Error starting recording:', error);
+    console.error('❌ startRecording ERROR:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     return null;
   }
 }
