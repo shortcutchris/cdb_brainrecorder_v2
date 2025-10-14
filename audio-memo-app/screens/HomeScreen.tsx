@@ -11,6 +11,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -22,6 +23,7 @@ export default function HomeScreen({ navigation }: Props) {
   const { recordings, loading, deleteRecording, updateRecording, refresh } =
     useRecordings();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   // Auto-refresh when screen is focused and poll for updates
   useFocusEffect(
@@ -78,11 +80,10 @@ export default function HomeScreen({ navigation }: Props) {
             resizeMode="contain"
           />
           <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-            CDB BrainRecorder
+            {t('home.emptyTitle')}
           </Text>
           <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
-            Nimm deine Gedanken auf und lass sie durch KI verarbeiten.{'\n\n'}
-            Erstelle Transkripte, generiere Zusammenfassungen und stelle individuelle Fragen zu deinen Aufnahmen.
+            {t('home.emptyDescription')}
           </Text>
         </View>
 
@@ -104,7 +105,7 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <Ionicons name="folder-outline" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
         <Text style={[styles.headerText, { color: colors.textSecondary }]}>
-          {recordings.length} {recordings.length === 1 ? 'Aufnahme' : 'Aufnahmen'}
+          {t('home.recordingsCount', { count: recordings.length })}
         </Text>
       </View>
 
