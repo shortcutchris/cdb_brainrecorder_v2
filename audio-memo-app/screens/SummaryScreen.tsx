@@ -52,7 +52,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
   // Only show error after data is loaded
   useEffect(() => {
     if (isReady && !recording) {
-      Alert.alert(t('summary:errorTitle'), t('common:errors.recordingNotFound'));
+      Alert.alert(t('summary.errorTitle'), t('common:errors.recordingNotFound'));
       navigation.goBack();
     }
   }, [isReady, recording, navigation, t]);
@@ -81,7 +81,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
       await generateRecordingSummary(recordingId, selectedLanguage);
     } catch (error: any) {
       Alert.alert(
-        t('summary:errorTitle'),
+        t('summary.errorTitle'),
         error.message || t('common:errors.summaryFailed')
       );
     } finally {
@@ -128,10 +128,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.emptyStateCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Ionicons name="sparkles-outline" size={48} color={colors.textSecondary} style={styles.emptyStateIcon} />
             <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
-              {t('summary:emptyTitle')}
+              {t('summary.emptyTitle')}
             </Text>
             <Text style={[styles.emptyStateDescription, { color: colors.textSecondary }]}>
-              {t('summary:emptyDescription')}
+              {t('summary.emptyDescription')}
             </Text>
             <TouchableOpacity
               onPress={handleGenerate}
@@ -139,7 +139,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
               disabled={isGenerating}
             >
               <Ionicons name="sparkles" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.generateButtonText}>{t('summary:createButton')}</Text>
+              <Text style={styles.generateButtonText}>{t('summary.createButton')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -148,10 +148,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.statusCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
             <Text style={[styles.statusTitle, { color: colors.text }]}>
-              {t('summary:processingTitle')}
+              {t('summary.processingTitle')}
             </Text>
             <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>
-              {t('summary:processingDescription')}
+              {t('summary.processingDescription')}
             </Text>
           </View>
         )}
@@ -160,10 +160,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.errorCard, { backgroundColor: colors.card, borderColor: colors.danger }]}>
             <Ionicons name="alert-circle-outline" size={48} color={colors.danger} style={styles.errorIcon} />
             <Text style={[styles.errorTitle, { color: colors.danger }]}>
-              {t('summary:errorTitle')}
+              {t('summary.errorTitle')}
             </Text>
             <Text style={[styles.errorDescription, { color: colors.textSecondary }]}>
-              {summary.error || t('summary:errorRetry')}
+              {summary.error || t('summary.errorRetry')}
             </Text>
             <TouchableOpacity
               onPress={handleGenerate}
@@ -182,7 +182,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
               <View style={styles.summaryHeader}>
                 <Ionicons name="sparkles" size={20} color={colors.success} />
                 <Text style={[styles.summaryTitle, { color: colors.text }]}>
-                  {t('summary:summaryTitle')}
+                  {t('summary.summaryTitle')}
                 </Text>
               </View>
               <Text style={[styles.summaryText, { color: colors.text }]}>
@@ -193,7 +193,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
             {/* Language Selector */}
             <View style={styles.languageSection}>
               <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
-                {t('summary:languageLabel')}
+                {t('summary.languageLabel')}
               </Text>
               <TouchableOpacity
                 style={[styles.languageSelector, { backgroundColor: colors.card, borderColor: colors.border }]}
@@ -222,7 +222,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
                 disabled={isGenerating}
               >
                 <Ionicons name="refresh" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.actionButtonText}>{t('summary:regenerateButton')}</Text>
+                <Text style={styles.actionButtonText}>{t('summary.regenerateButton')}</Text>
               </TouchableOpacity>
             </View>
           </>
