@@ -14,7 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Audio } from 'expo-av';
+import { requestRecordingPermissionsAsync } from 'expo-audio';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -84,9 +84,9 @@ export default function HomeScreen({ navigation }: Props) {
   const handleStartRecording = async () => {
     try {
       // Check and request microphone permission BEFORE navigating
-      const { status } = await Audio.requestPermissionsAsync();
+      const { granted } = await requestRecordingPermissionsAsync();
 
-      if (status === 'granted') {
+      if (granted) {
         // Permission granted, navigate to recording screen
         navigation.navigate('Recording');
       } else {

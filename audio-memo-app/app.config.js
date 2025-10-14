@@ -10,6 +10,9 @@ export default {
     icon: './assets/icon.png',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
+    plugins: [
+      'expo-audio'
+    ],
     splash: {
       image: './assets/splash-icon.png',
       resizeMode: 'contain',
@@ -18,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.cdb.brainrecorder',
-      buildNumber: '17',
+      buildNumber: '18',
       infoPlist: {
         NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
         UIBackgroundModes: ['audio'],

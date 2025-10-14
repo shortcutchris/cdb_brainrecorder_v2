@@ -10,7 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Audio } from 'expo-av';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -28,81 +28,35 @@ export default function PlayerScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
   const recording = getRecording(recordingId);
 
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
+  // expo-audio Hooks
+  const player = useAudioPlayer(recording ? { uri: recording.uri } : null);
+  const status = useAudioPlayerStatus(player);
+
+  // Derived state from player status
+  const isPlaying = status.playing;
+  const position = Math.floor(status.currentTime);
+  const duration = Math.floor(status.duration);
+
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newName, setNewName] = useState(recording?.name || '');
 
-  useEffect(() => {
-    if (recording) {
-      loadSound();
-    }
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [recording]);
+  // No useEffect needed - expo-audio Hooks handle loading and status automatically!
 
-  useEffect(() => {
-    // Update playback status
-    if (sound) {
-      const interval = setInterval(async () => {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          setPosition(Math.floor(status.positionMillis / 1000));
-          setDuration(Math.floor(status.durationMillis! / 1000));
-          setIsPlaying(status.isPlaying);
-
-          // Auto-stop when finished
-          if (status.didJustFinish) {
-            setIsPlaying(false);
-            setPosition(0);
-          }
-        }
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  }, [sound]);
-
-  const loadSound = async () => {
-    if (!recording) return;
-    try {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: recording.uri },
-        { shouldPlay: false }
-      );
-      setSound(newSound);
-      const status = await newSound.getStatusAsync();
-      if (status.isLoaded) {
-        setDuration(Math.floor(status.durationMillis! / 1000));
-      }
-    } catch (error) {
-      console.error('Error loading sound:', error);
-      Alert.alert(t('player.errorTitle'), t('player.audioLoadFailed'));
-    }
-  };
-
-  const handlePlayPause = async () => {
-    if (!sound) return;
+  const handlePlayPause = () => {
     if (isPlaying) {
-      await sound.pauseAsync();
+      player.pause();
     } else {
-      await sound.playAsync();
+      player.play();
     }
   };
 
-  const handleSeek = async (value: number) => {
-    if (!sound) return;
-    await sound.setPositionAsync(value * 1000);
+  const handleSeek = (value: number) => {
+    player.seekTo(value);
   };
 
-  const handleSkip = async (seconds: number) => {
-    if (!sound) return;
+  const handleSkip = (seconds: number) => {
     const newPosition = Math.max(0, Math.min(duration, position + seconds));
-    await sound.setPositionAsync(newPosition * 1000);
+    player.seekTo(newPosition);
   };
 
   const handleDelete = () => {
@@ -115,9 +69,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
           text: t('player.delete'),
           style: 'destructive',
           onPress: async () => {
-            if (sound) {
-              await sound.unloadAsync();
-            }
+            // Player cleanup is automatic with expo-audio Hooks
             await deleteRecording(recordingId);
             navigation.goBack();
           },

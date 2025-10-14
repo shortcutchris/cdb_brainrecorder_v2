@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform, AppState } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Audio } from 'expo-av';
+import {
+  useAudioRecorder,
+  useAudioRecorderState,
+  RecordingPresets,
+  setAudioModeAsync,
+  requestRecordingPermissionsAsync
+} from 'expo-audio';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/config';
@@ -9,47 +16,73 @@ import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { startRecording, stopRecording, formatDuration } from '../utils/audio';
+import { formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Recording'>;
+
+// Helper function for formatting recording names
+function formatDefaultName(locale: string, label: string): string {
+  const now = new Date();
+  const date = now.toLocaleDateString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+  });
+  const time = now.toLocaleTimeString(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${label} ${date} ${time}`;
+}
 
 export default function RecordingScreen({ navigation }: Props) {
   const { addRecording, transcribeRecording } = useRecordings();
   const { colors } = useTheme();
   const { autoTranscribeEnabled } = useSettings();
   const { t } = useTranslation();
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [duration, setDuration] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
+
+  // expo-audio Hooks
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
+
+  // Duration from recorderState (in seconds)
+  const duration = Math.floor(recorderState.durationMillis / 1000);
+  const isRecording = recorderState.isRecording;
+
   const appState = useRef(AppState.currentState);
 
-  // Initialize recording on mount
+  // Setup Audio Mode on mount (with background recording support!)
   useEffect(() => {
+    const setupAudioMode = async () => {
+      try {
+        console.log('⚙️ Setting up audio mode with background support...');
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: true,
+          shouldPlayInBackground: true, // ⭐ KEY for background recording!
+          interruptionMode: 'duckOthers',
+          interruptionModeAndroid: 'duckOthers',
+        });
+        console.log('✅ Audio mode configured successfully');
+      } catch (error) {
+        console.error('❌ Error setting up audio mode:', error);
+      }
+    };
+
+    setupAudioMode();
     console.log('✅ RecordingScreen mounted');
     initRecording();
+
     return () => {
       console.log('❌ RecordingScreen unmounting');
-      // IMPROVED CLEANUP: Only stop recording if explicitly not recording anymore
-      // This prevents accidental stops when screen briefly unmounts/remounts
-      if (recording && !isRecording) {
-        console.log('🧹 Cleanup: Stopping inactive recording');
-        recording.stopAndUnloadAsync().catch(err => console.error('Cleanup error:', err));
-      } else if (recording && isRecording) {
-        console.log('⚠️ Warning: Recording still active during unmount - keeping it alive');
+      // Cleanup: Stop recording if still active
+      if (recorderState.isRecording) {
+        console.log('🧹 Cleanup: Stopping active recording');
+        recorder.stop().catch(err => console.error('Cleanup error:', err));
       }
     };
   }, []);
 
-  // Timer for duration
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setDuration((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording]);
+  // Timer is now directly from recorderState.durationMillis - no useEffect needed!
 
   // Monitor App State changes (Background/Foreground)
   useEffect(() => {
@@ -71,14 +104,30 @@ export default function RecordingScreen({ navigation }: Props) {
   }, [isRecording, duration]);
 
   const initRecording = async () => {
-    console.log('🎙️ Initializing recording...');
-    const newRecording = await startRecording();
-    if (newRecording) {
-      setRecording(newRecording);
-      setIsRecording(true);
+    try {
+      console.log('🎙️ Initializing recording...');
+
+      // Check permission first
+      const { granted } = await requestRecordingPermissionsAsync();
+      if (!granted) {
+        console.error('❌ Permission denied by user');
+        Alert.alert(
+          t('recording.errorTitle'),
+          t('recording.microphonePermissionDenied'),
+          [{ text: t('common:buttons.ok'), onPress: () => navigation.goBack() }]
+        );
+        return;
+      }
+
+      console.log('✅ Permission granted');
+
+      // Prepare and start recording
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+
       console.log('✅ Recording started successfully');
-    } else {
-      console.log('❌ Recording failed to start');
+    } catch (error) {
+      console.error('❌ Recording start ERROR:', error);
       Alert.alert(
         t('recording.errorTitle'),
         t('recording.microphonePermissionDenied'),
@@ -88,30 +137,58 @@ export default function RecordingScreen({ navigation }: Props) {
   };
 
   const handleStop = async () => {
-    if (!recording) return;
+    try {
+      console.log('🔴 Stopping recording...');
 
-    setIsRecording(false);
+      // Stop recording
+      await recorder.stop();
 
-    // Get current language and locale for recording name
-    const currentLanguage = i18n.language;
-    const locale = currentLanguage === 'en' ? 'en-US' : 'de-DE';
-    const label = t('common:recording.defaultName');
+      const uri = recorder.uri;
+      if (!uri) {
+        throw new Error('Recording URI is null');
+      }
 
-    const newRecording = await stopRecording(recording, locale, label);
+      const recordingDuration = Math.floor(recorderState.durationMillis / 1000);
+      console.log('📊 Recording duration:', recordingDuration, 'seconds');
 
-    if (newRecording) {
+      // Generate unique ID and filename
+      const id = Date.now().toString();
+      const filename = `recording-${id}.m4a`;
+      const newUri = `${FileSystem.documentDirectory}${filename}`;
+
+      // Copy file to permanent location
+      await FileSystem.copyAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      // Get current language and locale for recording name
+      const currentLanguage = i18n.language;
+      const locale = currentLanguage === 'en' ? 'en-US' : 'de-DE';
+      const label = t('common:recording.defaultName');
+
+      // Create recording metadata
+      const newRecording = {
+        id,
+        uri: newUri,
+        name: formatDefaultName(locale, label),
+        createdAt: new Date().toISOString(),
+        duration: recordingDuration,
+      };
+
       await addRecording(newRecording);
 
-      // Auto-transcribe if enabled - pass URI directly and use retry logic in transcribeRecording
+      // Auto-transcribe if enabled
       if (autoTranscribeEnabled) {
-        // Start transcription asynchronously (don't wait for completion)
         transcribeRecording(newRecording.id, newRecording.uri).catch((error) => {
           console.error('Auto-transcribe error:', error);
         });
       }
 
+      console.log('✅ Recording saved successfully');
       navigation.goBack();
-    } else {
+    } catch (error) {
+      console.error('Error stopping recording:', error);
       Alert.alert(t('recording.errorTitle'), t('recording.saveFailed'));
       navigation.goBack();
     }
@@ -127,8 +204,8 @@ export default function RecordingScreen({ navigation }: Props) {
           text: t('recording.discard'),
           style: 'destructive',
           onPress: async () => {
-            if (recording) {
-              await recording.stopAndUnloadAsync();
+            if (recorderState.isRecording) {
+              await recorder.stop();
             }
             navigation.goBack();
           },
