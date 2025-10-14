@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
   StyleSheet,
   Image,
 } from 'react-native';
@@ -24,6 +25,27 @@ export default function HomeScreen({ navigation }: Props) {
     useRecordings();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter recordings based on search query
+  const filteredRecordings = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return recordings;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return recordings.filter((recording) => {
+      // Search in recording name
+      const nameMatch = recording.name.toLowerCase().includes(query);
+
+      // Search in transcript text (if exists and completed)
+      const transcriptMatch =
+        recording.transcript?.status === 'completed' &&
+        recording.transcript.text?.toLowerCase().includes(query);
+
+      return nameMatch || transcriptMatch;
+    });
+  }, [recordings, searchQuery]);
 
   // Auto-refresh when screen is focused and poll for updates
   useFocusEffect(
@@ -101,17 +123,40 @@ export default function HomeScreen({ navigation }: Props) {
   // List View
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Search Bar */}
+      <View style={[styles.searchContainer, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder={t('home.searchPlaceholder')}
+          placeholderTextColor={colors.textSecondary}
+          style={[styles.searchInput, { color: colors.text }]}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            style={styles.searchClearButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
+      </View>
+
       {/* Metadata Header */}
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <Ionicons name="folder-outline" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
         <Text style={[styles.headerText, { color: colors.textSecondary }]}>
-          {t('home.recordingsCount', { count: recordings.length })}
+          {searchQuery.trim()
+            ? `${filteredRecordings.length} ${t('home.searchResults')}`
+            : t('home.recordingsCount', { count: recordings.length })}
         </Text>
       </View>
 
       {/* Recordings List */}
       <FlatList
-        data={recordings}
+        data={filteredRecordings}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <RecordingItem
@@ -168,6 +213,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 4,
+  },
+  searchClearButton: {
+    marginLeft: 12,
   },
   header: {
     flexDirection: 'row',

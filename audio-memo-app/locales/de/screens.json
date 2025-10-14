@@ -4,7 +4,9 @@
     "emptyTitle": "CDB BrainRecorder",
     "emptyDescription": "Nimm deine Gedanken auf und lass sie durch KI verarbeiten.\n\nErstelle Transkripte, generiere Zusammenfassungen und stelle individuelle Fragen zu deinen Aufnahmen.",
     "recordingsCount": "{{count}} Aufnahme",
-    "recordingsCount_other": "{{count}} Aufnahmen"
+    "recordingsCount_other": "{{count}} Aufnahmen",
+    "searchPlaceholder": "Suche nach Namen oder Inhalt...",
+    "searchResults": "Ergebnisse"
   },
   "recording": {
     "title": "Aufnahme",

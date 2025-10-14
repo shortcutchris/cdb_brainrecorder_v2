@@ -4,7 +4,9 @@
     "emptyTitle": "CDB BrainRecorder",
     "emptyDescription": "Record your thoughts and let AI process them.\n\nCreate transcripts, generate summaries, and ask custom questions about your recordings.",
     "recordingsCount": "{{count}} Recording",
-    "recordingsCount_other": "{{count}} Recordings"
+    "recordingsCount_other": "{{count}} Recordings",
+    "searchPlaceholder": "Search by name or content...",
+    "searchResults": "Results"
   },
   "recording": {
     "title": "Recording",
