@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -23,6 +24,7 @@ import { formatDate, formatDuration } from '../utils/audio';
 type Props = NativeStackScreenProps<RootStackParamList, 'Summary'>;
 
 export default function SummaryScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { recordingId } = route.params;
   const { getRecording, generateRecordingSummary, refresh } = useRecordings();
   const { colors } = useTheme();
@@ -50,10 +52,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
   // Only show error after data is loaded
   useEffect(() => {
     if (isReady && !recording) {
-      Alert.alert('Fehler', 'Aufnahme nicht gefunden.');
+      Alert.alert(t('summary:errorTitle'), t('common:errors.recordingNotFound'));
       navigation.goBack();
     }
-  }, [isReady, recording, navigation]);
+  }, [isReady, recording, navigation, t]);
 
   const handleGenerate = async () => {
     if (!recording) return;
@@ -61,12 +63,12 @@ export default function SummaryScreen({ route, navigation }: Props) {
     // Check if transcript exists
     if (!recording.transcript || recording.transcript.status !== 'completed') {
       Alert.alert(
-        'Kein Transkript',
-        'Bitte erstelle zuerst ein Transkript dieser Aufnahme.',
+        t('common:errors.noTranscriptTitle'),
+        t('common:errors.noTranscriptMessage'),
         [
-          { text: 'OK' },
+          { text: t('common:buttons.ok') },
           {
-            text: 'Zum Transkript',
+            text: t('common:buttons.goToTranscript'),
             onPress: () => navigation.navigate('Transcript', { recordingId }),
           },
         ]
@@ -79,8 +81,8 @@ export default function SummaryScreen({ route, navigation }: Props) {
       await generateRecordingSummary(recordingId, selectedLanguage);
     } catch (error: any) {
       Alert.alert(
-        'Fehler',
-        error.message || 'Zusammenfassung konnte nicht erstellt werden.'
+        t('summary:errorTitle'),
+        error.message || t('common:errors.summaryFailed')
       );
     } finally {
       setIsGenerating(false);
@@ -90,7 +92,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
   const handleCopyToClipboard = async () => {
     if (recording?.summary?.text) {
       await Clipboard.setStringAsync(recording.summary.text);
-      Alert.alert('Kopiert', 'Zusammenfassung wurde in die Zwischenablage kopiert.');
+      Alert.alert(t('common:alerts.copied'), t('common:alerts.summaryClipboard'));
     }
   };
 
@@ -126,10 +128,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.emptyStateCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Ionicons name="sparkles-outline" size={48} color={colors.textSecondary} style={styles.emptyStateIcon} />
             <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
-              Noch keine Zusammenfassung
+              {t('summary:emptyTitle')}
             </Text>
             <Text style={[styles.emptyStateDescription, { color: colors.textSecondary }]}>
-              Erstelle eine AI-generierte Zusammenfassung des Transkripts
+              {t('summary:emptyDescription')}
             </Text>
             <TouchableOpacity
               onPress={handleGenerate}
@@ -137,7 +139,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
               disabled={isGenerating}
             >
               <Ionicons name="sparkles" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.generateButtonText}>Zusammenfassung erstellen</Text>
+              <Text style={styles.generateButtonText}>{t('summary:createButton')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -146,10 +148,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.statusCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
             <Text style={[styles.statusTitle, { color: colors.text }]}>
-              Erstelle Zusammenfassung...
+              {t('summary:processingTitle')}
             </Text>
             <Text style={[styles.statusDescription, { color: colors.textSecondary }]}>
-              Dies kann einen Moment dauern
+              {t('summary:processingDescription')}
             </Text>
           </View>
         )}
@@ -158,10 +160,10 @@ export default function SummaryScreen({ route, navigation }: Props) {
           <View style={[styles.errorCard, { backgroundColor: colors.card, borderColor: colors.danger }]}>
             <Ionicons name="alert-circle-outline" size={48} color={colors.danger} style={styles.errorIcon} />
             <Text style={[styles.errorTitle, { color: colors.danger }]}>
-              Fehler
+              {t('summary:errorTitle')}
             </Text>
             <Text style={[styles.errorDescription, { color: colors.textSecondary }]}>
-              {summary.error || 'Zusammenfassung fehlgeschlagen'}
+              {summary.error || t('summary:errorRetry')}
             </Text>
             <TouchableOpacity
               onPress={handleGenerate}
@@ -169,7 +171,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
               disabled={isGenerating}
             >
               <Ionicons name="refresh" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.retryButtonText}>Erneut versuchen</Text>
+              <Text style={styles.retryButtonText}>{t('common:buttons.retry')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -180,7 +182,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
               <View style={styles.summaryHeader}>
                 <Ionicons name="sparkles" size={20} color={colors.success} />
                 <Text style={[styles.summaryTitle, { color: colors.text }]}>
-                  Zusammenfassung
+                  {t('summary:summaryTitle')}
                 </Text>
               </View>
               <Text style={[styles.summaryText, { color: colors.text }]}>
@@ -191,7 +193,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
             {/* Language Selector */}
             <View style={styles.languageSection}>
               <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
-                Sprache:
+                {t('summary:languageLabel')}
               </Text>
               <TouchableOpacity
                 style={[styles.languageSelector, { backgroundColor: colors.card, borderColor: colors.border }]}
@@ -211,7 +213,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
                 style={[styles.actionButton, { backgroundColor: colors.textSecondary }]}
               >
                 <Ionicons name="copy-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.actionButtonText}>Kopieren</Text>
+                <Text style={styles.actionButtonText}>{t('common:buttons.copy')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -220,7 +222,7 @@ export default function SummaryScreen({ route, navigation }: Props) {
                 disabled={isGenerating}
               >
                 <Ionicons name="refresh" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.actionButtonText}>Neu generieren</Text>
+                <Text style={styles.actionButtonText}>{t('summary:regenerateButton')}</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -242,7 +244,9 @@ export default function SummaryScreen({ route, navigation }: Props) {
             style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Sprache wählen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {t('common:modals.selectLanguage')}
+            </Text>
 
             <View style={styles.languageList}>
               {LANGUAGES.map((language) => (

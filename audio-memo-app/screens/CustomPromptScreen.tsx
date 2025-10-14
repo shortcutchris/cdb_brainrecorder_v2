@@ -17,6 +17,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList, AiResult } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -26,6 +27,7 @@ import { formatDate, formatDuration } from '../utils/audio';
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomPrompt'>;
 
 export default function CustomPromptScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { recordingId } = route.params;
   const { getRecording, executeRecordingPrompt, refresh } = useRecordings();
   const { colors } = useTheme();
@@ -54,28 +56,28 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
   // Only show error after data is loaded
   useEffect(() => {
     if (isReady && !recording) {
-      Alert.alert('Fehler', 'Aufnahme nicht gefunden.');
+      Alert.alert(t('screens:customPrompt.errorTitle'), t('common:errors.recordingNotFound'));
       navigation.goBack();
     }
-  }, [isReady, recording, navigation]);
+  }, [isReady, recording, navigation, t]);
 
   const handleExecute = async () => {
     if (!recording) return;
 
     if (!prompt.trim()) {
-      Alert.alert('Hinweis', 'Bitte gib einen Prompt ein.');
+      Alert.alert(t('screens:customPrompt.hintTitle'), t('screens:customPrompt.hintMessage'));
       return;
     }
 
     // Check if transcript exists
     if (!recording.transcript || recording.transcript.status !== 'completed') {
       Alert.alert(
-        'Kein Transkript',
-        'Bitte erstelle zuerst ein Transkript dieser Aufnahme.',
+        t('screens:customPrompt.noTranscriptTitle'),
+        t('screens:customPrompt.noTranscriptMessage'),
         [
-          { text: 'OK' },
+          { text: t('common:buttons.ok') },
           {
-            text: 'Zum Transkript',
+            text: t('common:buttons.toTranscript'),
             onPress: () => navigation.navigate('Transcript', { recordingId }),
           },
         ]
@@ -89,8 +91,8 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
       setPrompt(''); // Clear input after successful execution
     } catch (error: any) {
       Alert.alert(
-        'Fehler',
-        error.message || 'Prompt konnte nicht ausgeführt werden.'
+        t('screens:customPrompt.errorTitle'),
+        error.message || t('screens:customPrompt.errorMessage')
       );
     } finally {
       setIsExecuting(false);
@@ -99,7 +101,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
 
   const handleCopyResult = async (text: string) => {
     await Clipboard.setStringAsync(text);
-    Alert.alert('Kopiert', 'Ergebnis wurde in die Zwischenablage kopiert.');
+    Alert.alert(t('common:alerts.copied'), t('common:alerts.copiedToClipboard'));
   };
 
   if (!recording) {
@@ -136,7 +138,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
           {hasResults && (
             <View style={styles.resultsSection}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Prompt-Historie
+                {t('screens:customPrompt.historyTitle')}
               </Text>
               {[...customPrompts].reverse().map((result, index) => (
                 <ResultCard
@@ -144,6 +146,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
                   result={result}
                   colors={colors}
                   onCopy={handleCopyResult}
+                  t={t}
                 />
               ))}
             </View>
@@ -153,10 +156,10 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
             <View style={[styles.emptyStateCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Ionicons name="chatbubbles-outline" size={48} color={colors.textSecondary} style={styles.emptyStateIcon} />
               <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
-                Noch keine Prompts
+                {t('screens:customPrompt.emptyTitle')}
               </Text>
               <Text style={[styles.emptyStateDescription, { color: colors.textSecondary }]}>
-                Gib unten einen eigenen Prompt ein, um das Transkript zu analysieren
+                {t('screens:customPrompt.emptyDescription')}
               </Text>
             </View>
           )}
@@ -167,7 +170,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
           {/* Language Selector */}
           <View style={styles.languageSection}>
             <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
-              Sprache:
+              {t('screens:customPrompt.languageLabel')}
             </Text>
             <TouchableOpacity
               style={[styles.languageSelector, { backgroundColor: colors.background, borderColor: colors.border }]}
@@ -183,7 +186,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
           <TextInput
             value={prompt}
             onChangeText={setPrompt}
-            placeholder="Prompt eingeben (z.B. 'Erstelle eine To-Do-Liste')"
+            placeholder={t('screens:customPrompt.inputPlaceholder')}
             placeholderTextColor={colors.textSecondary}
             style={[styles.textInput, { color: colors.text, backgroundColor: colors.background, borderColor: colors.border }]}
             multiline
@@ -203,7 +206,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
             ) : (
               <>
                 <Ionicons name="send" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.executeButtonText}>Ausführen</Text>
+                <Text style={styles.executeButtonText}>{t('common:buttons.execute')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -224,7 +227,7 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
               style={[styles.modalContent, { backgroundColor: colors.card }]}
               onPress={(e) => e.stopPropagation()}
             >
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Sprache wählen</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('common:language.selectLanguage')}</Text>
 
               <View style={styles.languageList}>
                 {LANGUAGES.map((language) => (
@@ -260,10 +263,12 @@ function ResultCard({
   result,
   colors,
   onCopy,
+  t,
 }: {
   result: AiResult;
   colors: any;
   onCopy: (text: string) => void;
+  t: any;
 }) {
   const isProcessing = result.status === 'processing';
   const isCompleted = result.status === 'completed';
@@ -284,7 +289,7 @@ function ResultCard({
         <View style={styles.processingContainer}>
           <ActivityIndicator size="small" color={colors.primary} />
           <Text style={[styles.processingText, { color: colors.textSecondary }]}>
-            Wird verarbeitet...
+            {t('screens:customPrompt.processingText')}
           </Text>
         </View>
       )}
@@ -299,7 +304,7 @@ function ResultCard({
             style={[styles.copyButton, { backgroundColor: colors.textSecondary }]}
           >
             <Ionicons name="copy-outline" size={16} color="#FFFFFF" />
-            <Text style={styles.copyButtonText}>Kopieren</Text>
+            <Text style={styles.copyButtonText}>{t('common:buttons.copy')}</Text>
           </TouchableOpacity>
         </>
       )}
@@ -308,7 +313,7 @@ function ResultCard({
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
           <Text style={[styles.errorText, { color: colors.danger }]}>
-            {result.error || 'Fehler beim Ausführen'}
+            {result.error || t('screens:customPrompt.errorExecuting')}
           </Text>
         </View>
       )}

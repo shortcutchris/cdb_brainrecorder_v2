@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert, StyleSheet, Platform } from 'react
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +16,7 @@ export default function RecordingScreen({ navigation }: Props) {
   const { addRecording, transcribeRecording } = useRecordings();
   const { colors } = useTheme();
   const { autoTranscribeEnabled } = useSettings();
+  const { t } = useTranslation();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [duration, setDuration] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -47,9 +49,9 @@ export default function RecordingScreen({ navigation }: Props) {
       setIsRecording(true);
     } else {
       Alert.alert(
-        'Fehler',
-        'Mikrofonzugriff wurde verweigert. Bitte erlaube den Zugriff in den Einstellungen.',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
+        t('recording.errorTitle'),
+        t('recording.microphonePermissionDenied'),
+        [{ text: t('common:buttons.ok'), onPress: () => navigation.goBack() }]
       );
     }
   };
@@ -73,19 +75,19 @@ export default function RecordingScreen({ navigation }: Props) {
 
       navigation.goBack();
     } else {
-      Alert.alert('Fehler', 'Aufnahme konnte nicht gespeichert werden.');
+      Alert.alert(t('recording.errorTitle'), t('recording.saveFailed'));
       navigation.goBack();
     }
   };
 
   const handleCancel = () => {
     Alert.alert(
-      'Aufnahme verwerfen?',
-      'Möchtest du die aktuelle Aufnahme wirklich verwerfen?',
+      t('recording.discardConfirm'),
+      t('recording.discardMessage'),
       [
-        { text: 'Weiter aufnehmen', style: 'cancel' },
+        { text: t('recording.continueRecording'), style: 'cancel' },
         {
-          text: 'Verwerfen',
+          text: t('recording.discard'),
           style: 'destructive',
           onPress: async () => {
             if (recording) {
@@ -112,7 +114,9 @@ export default function RecordingScreen({ navigation }: Props) {
         {/* Recording Indicator */}
         <View style={styles.indicatorContainer}>
           <Ionicons name="radio-button-on" size={24} color={colors.danger} />
-          <Text style={[styles.recordingText, { color: colors.danger }]}>REC</Text>
+          <Text style={[styles.recordingText, { color: colors.danger }]}>
+            {t('recording.rec')}
+          </Text>
         </View>
 
         {/* Timer */}
@@ -137,12 +141,12 @@ export default function RecordingScreen({ navigation }: Props) {
           ]}
         >
           <Ionicons name="stop" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.stopButtonText}>Stopp</Text>
+          <Text style={styles.stopButtonText}>{t('recording.stop')}</Text>
         </TouchableOpacity>
 
         {/* Helper Text */}
         <Text style={[styles.helperText, { color: colors.textSecondary }]}>
-          Zum Speichern stoppen
+          {t('recording.stopToSave')}
         </Text>
       </View>
     </View>

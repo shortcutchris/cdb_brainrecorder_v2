@@ -11,6 +11,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -22,6 +23,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
   const { getRecording, transcribeRecording } = useRecordings();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const recording = getRecording(recordingId);
 
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -31,7 +33,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
     try {
       await transcribeRecording(recordingId);
     } catch (error) {
-      Alert.alert('Fehler', 'Transkription fehlgeschlagen. Bitte versuche es erneut.');
+      Alert.alert(t('transcript.errorTitle'), t('transcript.errorMessage'));
     } finally {
       setIsTranscribing(false);
     }
@@ -40,7 +42,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
   const handleCopyToClipboard = async () => {
     if (recording?.transcript?.text) {
       await Clipboard.setStringAsync(recording.transcript.text);
-      Alert.alert('✓ Kopiert', 'Text wurde in die Zwischenablage kopiert.');
+      Alert.alert(t('transcript.copiedTitle'), t('transcript.copiedMessage'));
     }
   };
 
@@ -48,7 +50,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
     return (
       <View style={[styles.notFoundContainer, { backgroundColor: colors.background }]}>
         <Text style={[styles.notFoundText, { color: colors.textSecondary }]}>
-          Aufnahme nicht gefunden
+          {t('transcript.notFound')}
         </Text>
       </View>
     );
@@ -80,10 +82,10 @@ export default function TranscriptScreen({ route, navigation }: Props) {
             <View style={styles.emptyState}>
               <Ionicons name="document-text-outline" size={48} color={colors.textSecondary} />
               <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
-                Noch kein Transkript vorhanden
+                {t('transcript.emptyTitle')}
               </Text>
               <Text style={[styles.emptyStateSubtext, { color: colors.textSecondary }]}>
-                Erstelle ein Transkript dieser Aufnahme
+                {t('transcript.emptyDescription')}
               </Text>
               <TouchableOpacity
                 onPress={handleTranscribe}
@@ -91,7 +93,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
                 disabled={isTranscribing}
               >
                 <Ionicons name="sparkles" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.transcribeButtonText}>Jetzt transkribieren</Text>
+                <Text style={styles.transcribeButtonText}>{t('transcript.createButton')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -101,10 +103,10 @@ export default function TranscriptScreen({ route, navigation }: Props) {
             <View style={styles.processingState}>
               <ActivityIndicator size="large" color={colors.primary} />
               <Text style={[styles.processingText, { color: colors.text }]}>
-                Transkription läuft...
+                {t('transcript.processingTitle')}
               </Text>
               <Text style={[styles.processingSubtext, { color: colors.textSecondary }]}>
-                Dies kann einige Sekunden dauern
+                {t('transcript.processingDescription')}
               </Text>
             </View>
           )}
@@ -114,17 +116,17 @@ export default function TranscriptScreen({ route, navigation }: Props) {
             <View style={styles.errorState}>
               <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
               <Text style={[styles.errorText, { color: colors.danger }]}>
-                Transkription fehlgeschlagen
+                {t('transcript.errorRetry')}
               </Text>
               <Text style={[styles.errorSubtext, { color: colors.textSecondary }]}>
-                {transcript.error || 'Ein unbekannter Fehler ist aufgetreten'}
+                {transcript.error || t('transcript.errorUnknown')}
               </Text>
               <TouchableOpacity
                 onPress={handleTranscribe}
                 style={[styles.retryButton, { backgroundColor: colors.primary }]}
               >
                 <Ionicons name="refresh" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.retryButtonText}>Erneut versuchen</Text>
+                <Text style={styles.retryButtonText}>{t('common:buttons.retry')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -135,7 +137,7 @@ export default function TranscriptScreen({ route, navigation }: Props) {
               <View style={styles.transcriptHeader}>
                 <Ionicons name="document-text" size={24} color={colors.primary} />
                 <Text style={[styles.transcriptHeaderText, { color: colors.text }]}>
-                  Transkript
+                  {t('transcript.transcriptTitle')}
                 </Text>
               </View>
               <Text style={[styles.transcriptText, { color: colors.text }]}>
@@ -153,7 +155,9 @@ export default function TranscriptScreen({ route, navigation }: Props) {
               style={[styles.actionButton, { backgroundColor: colors.card }]}
             >
               <Ionicons name="copy-outline" size={20} color={colors.text} />
-              <Text style={[styles.actionButtonText, { color: colors.text }]}>Kopieren</Text>
+              <Text style={[styles.actionButtonText, { color: colors.text }]}>
+                {t('transcript.copyButton')}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -161,7 +165,9 @@ export default function TranscriptScreen({ route, navigation }: Props) {
               style={[styles.actionButton, { backgroundColor: colors.card }]}
             >
               <Ionicons name="refresh" size={20} color={colors.text} />
-              <Text style={[styles.actionButtonText, { color: colors.text }]}>Neu laden</Text>
+              <Text style={[styles.actionButtonText, { color: colors.text }]}>
+                {t('transcript.reloadButton')}
+              </Text>
             </TouchableOpacity>
           </View>
         )}

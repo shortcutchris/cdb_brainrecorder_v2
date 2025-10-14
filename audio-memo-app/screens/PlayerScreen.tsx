@@ -13,6 +13,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
@@ -24,6 +25,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
   const { recordingId } = route.params;
   const { getRecording, deleteRecording, updateRecording } = useRecordings();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const recording = getRecording(recordingId);
 
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -79,7 +81,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
       }
     } catch (error) {
       console.error('Error loading sound:', error);
-      Alert.alert('Fehler', 'Audio konnte nicht geladen werden.');
+      Alert.alert(t('player.errorTitle'), t('player.audioLoadFailed'));
     }
   };
 
@@ -105,12 +107,12 @@ export default function PlayerScreen({ route, navigation }: Props) {
 
   const handleDelete = () => {
     Alert.alert(
-      '⚠️ Aufnahme löschen?',
-      `"${recording?.name}" wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`,
+      t('player.deleteConfirm'),
+      `"${recording?.name}" ${t('player.deleteMessage')}`,
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common:buttons.cancel'), style: 'cancel' },
         {
-          text: 'Löschen',
+          text: t('player.delete'),
           style: 'destructive',
           onPress: async () => {
             if (sound) {
@@ -134,7 +136,9 @@ export default function PlayerScreen({ route, navigation }: Props) {
   if (!recording) {
     return (
       <View style={[styles.notFoundContainer, { backgroundColor: colors.background }]}>
-        <Text style={[styles.notFoundText, { color: colors.textSecondary }]}>Aufnahme nicht gefunden</Text>
+        <Text style={[styles.notFoundText, { color: colors.textSecondary }]}>
+          {t('player.notFound')}
+        </Text>
       </View>
     );
   }
@@ -212,14 +216,18 @@ export default function PlayerScreen({ route, navigation }: Props) {
             <View style={[styles.actionButtonIcon, { backgroundColor: colors.card }]}>
               <Ionicons name="create-outline" size={24} color={colors.textSecondary} />
             </View>
-            <Text style={[styles.actionButtonLabel, { color: colors.textSecondary }]}>Umbenennen</Text>
+            <Text style={[styles.actionButtonLabel, { color: colors.textSecondary }]}>
+              {t('player.rename')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
             <View style={[styles.actionButtonIcon, { backgroundColor: colors.card }]}>
               <Ionicons name="trash-outline" size={24} color={colors.danger} />
             </View>
-            <Text style={[styles.actionButtonLabel, { color: colors.textSecondary }]}>Löschen</Text>
+            <Text style={[styles.actionButtonLabel, { color: colors.textSecondary }]}>
+              {t('player.delete')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -239,12 +247,14 @@ export default function PlayerScreen({ route, navigation }: Props) {
             style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Umbenennen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {t('player.renameTitle')}
+            </Text>
 
             <TextInput
               value={newName}
               onChangeText={setNewName}
-              placeholder="Name der Aufnahme"
+              placeholder={t('player.renamePlaceholder')}
               placeholderTextColor={colors.textSecondary}
               style={[styles.textInput, { borderColor: colors.border, color: colors.text }]}
               autoFocus
@@ -256,14 +266,16 @@ export default function PlayerScreen({ route, navigation }: Props) {
                 onPress={() => setShowRenameModal(false)}
                 style={styles.cancelButton}
               >
-                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Abbrechen</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>
+                  {t('common:buttons.cancel')}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={handleRename}
                 style={[styles.saveButton, { backgroundColor: colors.primary }]}
               >
-                <Text style={styles.buttonText}>Speichern</Text>
+                <Text style={styles.buttonText}>{t('common:buttons.save')}</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
