@@ -1,0 +1,31 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "rename": "Rename",
+    "copy": "Copy",
+    "retry": "Retry",
+    "generate": "Generate",
+    "execute": "Execute",
+    "close": "Close",
+    "ok": "OK"
+  },
+  "status": {
+    "processing": "Processing...",
+    "completed": "Completed",
+    "error": "Error",
+    "loading": "Loading..."
+  },
+  "errors": {
+    "notFound": "Not found",
+    "failed": "Failed",
+    "tryAgain": "Please try again"
+  },
+  "alerts": {
+    "copied": "Copied",
+    "success": "Success",
+    "confirm": "Confirm"
+  }
+}

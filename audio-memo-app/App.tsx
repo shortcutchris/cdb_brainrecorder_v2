@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from './types';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { LocalizationProvider } from './contexts/LocalizationContext';
+import './i18n/config';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -145,11 +147,13 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <SettingsProvider>
-        <AppNavigator />
-      </SettingsProvider>
-    </ThemeProvider>
+    <LocalizationProvider>
+      <ThemeProvider>
+        <SettingsProvider>
+          <AppNavigator />
+        </SettingsProvider>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
 

@@ -1,0 +1,31 @@
+{
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "rename": "Umbenennen",
+    "copy": "Kopieren",
+    "retry": "Erneut versuchen",
+    "generate": "Generieren",
+    "execute": "Ausführen",
+    "close": "Schließen",
+    "ok": "OK"
+  },
+  "status": {
+    "processing": "Wird verarbeitet...",
+    "completed": "Fertig",
+    "error": "Fehler",
+    "loading": "Lädt..."
+  },
+  "errors": {
+    "notFound": "Nicht gefunden",
+    "failed": "Fehlgeschlagen",
+    "tryAgain": "Bitte versuche es erneut"
+  },
+  "alerts": {
+    "copied": "Kopiert",
+    "success": "Erfolgreich",
+    "confirm": "Bestätigen"
+  }
+}
