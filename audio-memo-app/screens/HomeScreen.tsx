@@ -84,13 +84,6 @@ export default function HomeScreen({ navigation }: Props) {
             Nimm deine Gedanken auf und lass sie durch KI verarbeiten.{'\n\n'}
             Erstelle Transkripte, generiere Zusammenfassungen und stelle individuelle Fragen zu deinen Aufnahmen.
           </Text>
-          <TouchableOpacity
-            onPress={handleStartRecording}
-            style={[styles.startButton, { backgroundColor: colors.primary }]}
-          >
-            <Ionicons name="mic" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
-            <Text style={styles.startButtonText}>Erste Aufnahme starten</Text>
-          </TouchableOpacity>
         </View>
 
         {/* FAB for consistency (even in empty state) */}
@@ -174,25 +167,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
-    marginBottom: 32,
-  },
-  startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    shadowColor: '#ffaa3a',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  startButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
