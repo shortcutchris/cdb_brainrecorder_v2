@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSettings, LANGUAGES } from '../contexts/SettingsContext';
@@ -21,6 +22,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const { themeMode, colors, setThemeMode, isDark } = useTheme();
   const { autoTranscribeEnabled, setAutoTranscribeEnabled, autoSummaryEnabled, setAutoSummaryEnabled, defaultLanguage, setDefaultLanguage } = useSettings();
   const { appLanguage, setAppLanguage } = useLocalization();
+  const { t } = useTranslation();
   const [showAppLanguageModal, setShowAppLanguageModal] = useState(false);
   const [showAiLanguageModal, setShowAiLanguageModal] = useState(false);
 
@@ -31,6 +33,12 @@ export default function SettingsScreen({ navigation }: Props) {
   const selectedAiLanguage = LANGUAGES.find(lang => lang.code === defaultLanguage) || LANGUAGES[0];
   const selectedAppLanguage = APP_LANGUAGES.find(lang => lang.code === appLanguage) || APP_LANGUAGES[0];
 
+  const getModeText = (mode: string) => {
+    if (mode === 'auto') return t('settings.modeAuto');
+    if (mode === 'light') return t('settings.modeLight');
+    return t('settings.modeDark');
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
@@ -39,7 +47,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <View style={styles.sectionHeader}>
             <Ionicons name="color-palette-outline" size={20} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Erscheinungsbild
+              {t('settings.appearance')}
             </Text>
           </View>
 
@@ -57,10 +65,10 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    Automatisch
+                    {t('settings.appearanceAuto')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Folgt der Systemeinstellung
+                    {t('settings.appearanceAutoDesc')}
                   </Text>
                 </View>
               </View>
@@ -82,10 +90,10 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    Hell
+                    {t('settings.appearanceLight')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Heller Modus
+                    {t('settings.appearanceLightDesc')}
                   </Text>
                 </View>
               </View>
@@ -107,10 +115,10 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    Dunkel
+                    {t('settings.appearanceDark')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Dunkler Modus
+                    {t('settings.appearanceDarkDesc')}
                   </Text>
                 </View>
               </View>
@@ -124,7 +132,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <View style={styles.sectionHeader}>
             <Ionicons name="sparkles-outline" size={20} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              KI Einstellungen
+              {t('settings.aiSettings')}
             </Text>
           </View>
 
@@ -141,10 +149,10 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    Automatisches Transkribieren
+                    {t('settings.autoTranscribe')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Nach Aufnahme automatisch transkribieren
+                    {t('settings.autoTranscribeDesc')}
                   </Text>
                 </View>
               </View>
@@ -164,10 +172,10 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    Automatische Zusammenfassung
+                    {t('settings.autoSummary')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Erstellt automatisch eine Zusammenfassung nach Transkription
+                    {t('settings.autoSummaryDesc')}
                   </Text>
                 </View>
               </View>
@@ -180,7 +188,7 @@ export default function SettingsScreen({ navigation }: Props) {
           <View style={styles.sectionHeader}>
             <Ionicons name="globe-outline" size={20} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Sprache & Region
+              {t('settings.language')}
             </Text>
           </View>
 
@@ -193,10 +201,10 @@ export default function SettingsScreen({ navigation }: Props) {
               <View style={styles.optionLeft}>
                 <View>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    App-Sprache
+                    {t('settings.appLanguage')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Sprache der Benutzeroberfläche
+                    {t('settings.appLanguageDesc')}
                   </Text>
                 </View>
               </View>
@@ -218,10 +226,10 @@ export default function SettingsScreen({ navigation }: Props) {
               <View style={styles.optionLeft}>
                 <View>
                   <Text style={[styles.optionText, { color: colors.text }]}>
-                    AI-Standardsprache
+                    {t('settings.aiLanguage')}
                   </Text>
                   <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-                    Gilt für alle AI-Funktionen
+                    {t('settings.aiLanguageDesc')}
                   </Text>
                 </View>
               </View>
@@ -240,14 +248,14 @@ export default function SettingsScreen({ navigation }: Props) {
           <View style={styles.sectionHeader}>
             <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Über
+              {t('settings.about')}
             </Text>
           </View>
 
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
-                App-Name
+                {t('settings.appName')}
               </Text>
               <Text style={[styles.infoValue, { color: colors.text }]}>
                 CDB BrainRecorder
@@ -258,7 +266,7 @@ export default function SettingsScreen({ navigation }: Props) {
 
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
-                Version
+                {t('settings.version')}
               </Text>
               <Text style={[styles.infoValue, { color: colors.text }]}>
                 1.0.0
@@ -269,10 +277,10 @@ export default function SettingsScreen({ navigation }: Props) {
 
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
-                Phase
+                {t('settings.phase')}
               </Text>
               <Text style={[styles.infoValue, { color: colors.text }]}>
-                Phase 1 - Offline First
+                {t('settings.phaseValue')}
               </Text>
             </View>
           </View>
@@ -283,8 +291,8 @@ export default function SettingsScreen({ navigation }: Props) {
           <View style={[styles.statusBadge, { backgroundColor: isDark ? '#1E293B' : '#F1F5F9' }]}>
             <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
             <Text style={[styles.statusText, { color: colors.textSecondary }]}>
-              Aktueller Modus: {themeMode === 'auto' ? 'Automatisch' : themeMode === 'light' ? 'Hell' : 'Dunkel'}
-              {themeMode === 'auto' && ` (${isDark ? 'Dunkel' : 'Hell'})`}
+              {t('settings.currentMode', { mode: getModeText(themeMode) })}
+              {themeMode === 'auto' && ` (${getModeText(isDark ? 'dark' : 'light')})`}
             </Text>
           </View>
         </View>
@@ -305,7 +313,7 @@ export default function SettingsScreen({ navigation }: Props) {
             style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>App-Sprache wählen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('settings.selectLanguage')}</Text>
 
             <View style={styles.languageList}>
               {APP_LANGUAGES.map((language) => (
@@ -348,7 +356,7 @@ export default function SettingsScreen({ navigation }: Props) {
             style={[styles.modalContent, { backgroundColor: colors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>AI-Sprache wählen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('settings.selectLanguage')}</Text>
 
             <View style={styles.languageList}>
               {LANGUAGES.map((language) => (
