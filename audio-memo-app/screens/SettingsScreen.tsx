@@ -183,6 +183,35 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* Prompt Library Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="library-outline" size={20} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('settings.promptLibrary')}
+            </Text>
+          </View>
+
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <TouchableOpacity
+              style={styles.option}
+              onPress={() => navigation.navigate('PromptLibrary')}
+            >
+              <View style={styles.optionLeft}>
+                <View>
+                  <Text style={[styles.optionText, { color: colors.text }]}>
+                    {t('settings.managePrompts')}
+                  </Text>
+                  <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
+                    {t('settings.managePromptsDesc')}
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Language & Region Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

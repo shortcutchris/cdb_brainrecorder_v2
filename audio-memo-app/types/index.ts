@@ -63,6 +63,23 @@ export interface Recording {
 }
 
 /**
+ * Prompt Template Interface
+ * Represents a reusable prompt template
+ */
+export interface PromptTemplate {
+  /** Unique identifier */
+  id: string;
+  /** Template name */
+  name: string;
+  /** Prompt text */
+  prompt: string;
+  /** Whether this is a system template (cannot be deleted) */
+  isSystem: boolean;
+  /** ISO timestamp of creation */
+  createdAt: string;
+}
+
+/**
  * Navigation types for React Navigation
  */
 export type RootStackParamList = {
@@ -73,4 +90,5 @@ export type RootStackParamList = {
   Transcript: { recordingId: string };
   Summary: { recordingId: string };
   CustomPrompt: { recordingId: string };
+  PromptLibrary: undefined;
 };

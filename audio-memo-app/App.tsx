@@ -9,6 +9,7 @@ import { RootStackParamList } from './types';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { LocalizationProvider } from './contexts/LocalizationContext';
+import { PromptTemplatesProvider } from './contexts/PromptTemplatesContext';
 import './i18n/config';
 
 // Screens
@@ -19,6 +20,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import TranscriptScreen from './screens/TranscriptScreen';
 import SummaryScreen from './screens/SummaryScreen';
 import CustomPromptScreen from './screens/CustomPromptScreen';
+import PromptLibraryScreen from './screens/PromptLibraryScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -142,6 +144,15 @@ function AppNavigator() {
             headerBackTitle: '',
           }}
         />
+        <Stack.Screen
+          name="PromptLibrary"
+          component={PromptLibraryScreen}
+          options={{
+            title: t('promptLibrary.title'),
+            presentation: 'card',
+            headerBackTitle: '',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -152,7 +163,9 @@ export default function App() {
     <LocalizationProvider>
       <ThemeProvider>
         <SettingsProvider>
-          <AppNavigator />
+          <PromptTemplatesProvider>
+            <AppNavigator />
+          </PromptTemplatesProvider>
         </SettingsProvider>
       </ThemeProvider>
     </LocalizationProvider>

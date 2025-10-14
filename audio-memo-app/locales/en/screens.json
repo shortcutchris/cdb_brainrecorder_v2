@@ -90,6 +90,8 @@
     "inputPlaceholder": "Enter prompt (e.g. 'Create a to-do list')",
     "executeButton": "Execute",
     "languageLabel": "Language:",
+    "selectTemplate": "Select Prompt Template",
+    "manageTemplates": "Manage Prompts",
     "processingText": "Processing...",
     "errorExecuting": "Error executing",
     "hintTitle": "Note",
@@ -118,6 +120,9 @@
     "autoTranscribeDesc": "Automatically transcribe after recording",
     "autoSummary": "Auto Summary",
     "autoSummaryDesc": "Automatically generate summary after transcription",
+    "promptLibrary": "Prompt Library",
+    "managePrompts": "Manage Prompts",
+    "managePromptsDesc": "Manage system and custom prompts",
     "about": "About",
     "appName": "App Name",
     "version": "Version",
@@ -128,5 +133,24 @@
     "modeLight": "Light",
     "modeDark": "Dark",
     "selectLanguage": "Select Language"
+  },
+  "promptLibrary": {
+    "title": "Prompt Library",
+    "systemTemplates": "System Prompts",
+    "userTemplates": "Custom Prompts",
+    "noUserTemplates": "No custom prompts created yet",
+    "addTemplate": "Create Prompt",
+    "editTemplate": "Edit Prompt",
+    "deleteConfirm": "Delete prompt?",
+    "deleteMessage": "Really delete \"{{name}}\"?",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. 'Meeting Notes'",
+    "promptLabel": "Prompt Text",
+    "promptPlaceholder": "e.g. 'Create meeting notes with participants and action items'",
+    "system": "SYSTEM",
+    "errorTitle": "Error",
+    "errorEmptyFields": "Please enter name and prompt",
+    "errorSaving": "Prompt could not be saved",
+    "errorDeleting": "Prompt could not be deleted"
   }
 }

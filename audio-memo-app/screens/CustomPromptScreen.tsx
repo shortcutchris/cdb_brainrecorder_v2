@@ -23,6 +23,7 @@ import { RootStackParamList, AiResult } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSettings, LANGUAGES, type Language } from '../contexts/SettingsContext';
+import { usePromptTemplates } from '../contexts/PromptTemplatesContext';
 import { formatDate, formatDuration } from '../utils/audio';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomPrompt'>;
@@ -33,11 +34,13 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
   const { getRecording, executeRecordingPrompt, refresh } = useRecordings();
   const { colors } = useTheme();
   const { defaultLanguage } = useSettings();
+  const { templates } = usePromptTemplates();
   const [prompt, setPrompt] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(defaultLanguage);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   const selectedLang = LANGUAGES.find(lang => lang.code === selectedLanguage) || LANGUAGES[0];
 
@@ -179,6 +182,18 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
 
         {/* Prompt Input */}
         <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          {/* Template Selector */}
+          <TouchableOpacity
+            style={[styles.templateButton, { backgroundColor: colors.background, borderColor: colors.border }]}
+            onPress={() => setShowTemplateModal(true)}
+          >
+            <Ionicons name="albums-outline" size={20} color={colors.primary} />
+            <Text style={[styles.templateButtonText, { color: colors.text }]}>
+              {t('screens:customPrompt.selectTemplate')}
+            </Text>
+            <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+
           {/* Language Selector */}
           <View style={styles.languageSection}>
             <Text style={[styles.languageLabel, { color: colors.textSecondary }]}>
@@ -223,6 +238,70 @@ export default function CustomPromptScreen({ route, navigation }: Props) {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Template Modal */}
+        <Modal
+          visible={showTemplateModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowTemplateModal(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowTemplateModal(false)}
+          >
+            <Pressable
+              style={[styles.modalContent, { backgroundColor: colors.card }]}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('screens:customPrompt.selectTemplate')}</Text>
+
+              <ScrollView style={styles.templateList} showsVerticalScrollIndicator={false}>
+                {templates.map((template) => (
+                  <TouchableOpacity
+                    key={template.id}
+                    style={[
+                      styles.templateOption,
+                      { borderColor: colors.border }
+                    ]}
+                    onPress={() => {
+                      setPrompt(template.prompt);
+                      setShowTemplateModal(false);
+                    }}
+                  >
+                    <View style={styles.templateOptionHeader}>
+                      <Ionicons
+                        name={template.isSystem ? 'star' : 'person'}
+                        size={16}
+                        color={template.isSystem ? colors.primary : colors.textSecondary}
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={[styles.templateOptionName, { color: colors.text }]}>
+                        {template.name}
+                      </Text>
+                    </View>
+                    <Text style={[styles.templateOptionPrompt, { color: colors.textSecondary }]} numberOfLines={2}>
+                      {template.prompt}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowTemplateModal(false);
+                  navigation.navigate('Settings');
+                }}
+                style={[styles.manageTemplatesButton, { borderColor: colors.border }]}
+              >
+                <Ionicons name="settings-outline" size={20} color={colors.primary} />
+                <Text style={[styles.manageTemplatesText, { color: colors.primary }]}>
+                  {t('screens:customPrompt.manageTemplates')}
+                </Text>
+              </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         {/* Language Modal */}
         <Modal
@@ -549,5 +628,54 @@ const styles = StyleSheet.create({
   languageOptionText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  templateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
+  templateButtonText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    marginLeft: 12,
+  },
+  templateList: {
+    maxHeight: 400,
+  },
+  templateOption: {
+    borderBottomWidth: 1,
+    paddingVertical: 16,
+  },
+  templateOptionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  templateOptionName: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  templateOptionPrompt: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  manageTemplatesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    paddingTop: 16,
+    marginTop: 8,
+    gap: 8,
+  },
+  manageTemplatesText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

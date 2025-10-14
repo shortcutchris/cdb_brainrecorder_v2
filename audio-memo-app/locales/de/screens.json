@@ -90,6 +90,8 @@
     "inputPlaceholder": "Prompt eingeben (z.B. 'Erstelle eine To-Do-Liste')",
     "executeButton": "Ausführen",
     "languageLabel": "Sprache:",
+    "selectTemplate": "Prompt-Vorlage auswählen",
+    "manageTemplates": "Prompts verwalten",
     "processingText": "Wird verarbeitet...",
     "errorExecuting": "Fehler beim Ausführen",
     "hintTitle": "Hinweis",
@@ -118,6 +120,9 @@
     "autoTranscribeDesc": "Nach Aufnahme automatisch transkribieren",
     "autoSummary": "Automatische Zusammenfassung",
     "autoSummaryDesc": "Erstellt automatisch eine Zusammenfassung nach Transkription",
+    "promptLibrary": "Prompt Bibliothek",
+    "managePrompts": "Prompts verwalten",
+    "managePromptsDesc": "System- und eigene Prompts verwalten",
     "about": "Über",
     "appName": "App-Name",
     "version": "Version",
@@ -128,5 +133,24 @@
     "modeLight": "Hell",
     "modeDark": "Dunkel",
     "selectLanguage": "Sprache wählen"
+  },
+  "promptLibrary": {
+    "title": "Prompt Bibliothek",
+    "systemTemplates": "System Prompts",
+    "userTemplates": "Eigene Prompts",
+    "noUserTemplates": "Noch keine eigenen Prompts erstellt",
+    "addTemplate": "Prompt erstellen",
+    "editTemplate": "Prompt bearbeiten",
+    "deleteConfirm": "Prompt löschen?",
+    "deleteMessage": "\"{{name}}\" wirklich löschen?",
+    "nameLabel": "Name",
+    "namePlaceholder": "z.B. 'Meeting Notes'",
+    "promptLabel": "Prompt Text",
+    "promptPlaceholder": "z.B. 'Erstelle Meeting-Notizen mit Teilnehmern und Aktionspunkten'",
+    "system": "SYSTEM",
+    "errorTitle": "Fehler",
+    "errorEmptyFields": "Bitte Name und Prompt eingeben",
+    "errorSaving": "Prompt konnte nicht gespeichert werden",
+    "errorDeleting": "Prompt konnte nicht gelöscht werden"
   }
 }
