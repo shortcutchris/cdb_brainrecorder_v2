@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 13.2.0"
+    "version": ">= 13.2.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -21,9 +22,6 @@
       "distribution": "store",
       "ios": {
         "resourceClass": "m-medium"
-      },
-      "env": {
-        "OPENAI_API_KEY": ""
       }
     }
   },

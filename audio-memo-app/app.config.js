@@ -38,6 +38,9 @@ export default {
     // Make environment variables available in the app
     extra: {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      eas: {
+        projectId: 'b2803f18-2a5a-41cd-a82e-5f4751bbf73c',
+      },
     },
   },
 };
