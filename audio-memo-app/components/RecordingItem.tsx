@@ -12,8 +12,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import * as Sharing from 'expo-sharing';
-import { File } from 'expo-file-system';
 import { Recording } from '../types';
 import { formatDate, formatDuration } from '../utils/audio';
 import { useTheme } from '../contexts/ThemeContext';
@@ -50,7 +48,6 @@ export default function RecordingItem({
     transcript: recording.transcript?.status,
     summary: recording.summary?.status,
   });
-
   // Detect status changes and show completed badge
   React.useEffect(() => {
     const prevTranscript = prevStatusRef.current.transcript;
@@ -102,45 +99,6 @@ export default function RecordingItem({
       onRename(recording.id, newName.trim());
     }
     setShowRenameModal(false);
-  };
-
-  const handleShare = async () => {
-    try {
-      setShowMenuModal(false);
-
-      // Check if sharing is available
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert(
-          t('common:recordingItem.sharingUnavailableTitle'),
-          t('common:recordingItem.sharingUnavailableMessage')
-        );
-        return;
-      }
-
-      // Check if file exists using new File API
-      const file = new File(recording.uri);
-      if (!file.exists) {
-        Alert.alert(
-          t('common:recordingItem.fileNotFoundTitle'),
-          t('common:recordingItem.fileNotFoundMessage')
-        );
-        return;
-      }
-
-      // Share file
-      await Sharing.shareAsync(recording.uri, {
-        mimeType: 'audio/x-m4a',
-        dialogTitle: recording.name,
-        UTI: 'public.audio',
-      });
-    } catch (error) {
-      console.error('Error sharing recording:', error);
-      Alert.alert(
-        t('common:recordingItem.shareErrorTitle'),
-        t('common:recordingItem.shareErrorMessage')
-      );
-    }
   };
 
   return (
@@ -432,27 +390,6 @@ export default function RecordingItem({
               </View>
             </TouchableOpacity>
 
-            <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
-
-            {/* Share/Export Recording */}
-            <TouchableOpacity
-              onPress={handleShare}
-              style={styles.menuItem}
-            >
-              <Ionicons
-                name="share-outline"
-                size={24}
-                color={colors.primary}
-              />
-              <View style={styles.menuItemTextContainer}>
-                <Text style={[styles.menuItemTitle, { color: colors.text }]}>
-                  {t('common:recordingItem.share')}
-                </Text>
-                <Text style={[styles.menuItemSubtitle, { color: colors.textSecondary }]}>
-                  {t('common:recordingItem.shareDescription')}
-                </Text>
-              </View>
-            </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>

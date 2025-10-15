@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
@@ -18,6 +19,7 @@ import { RootStackParamList } from '../types';
 import { useRecordings } from '../hooks/useRecordings';
 import { useTheme } from '../contexts/ThemeContext';
 import { formatDate, formatDuration } from '../utils/audio';
+import { shareRecordingFile, ShareAnchorRect } from '../utils/shareRecording';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Player'>;
 
@@ -27,6 +29,7 @@ export default function PlayerScreen({ route, navigation }: Props) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const recording = getRecording(recordingId);
+  const shareButtonRef = useRef<TouchableOpacity | null>(null);
 
   // expo-audio Hooks
   const player = useAudioPlayer(recording ? { uri: recording.uri } : null);
@@ -83,6 +86,45 @@ export default function PlayerScreen({ route, navigation }: Props) {
       await updateRecording(recordingId, newName.trim());
     }
     setShowRenameModal(false);
+  };
+
+  const measureShareAnchorRect = React.useCallback(async (): Promise<ShareAnchorRect | undefined> => {
+    if (!shareButtonRef.current) {
+      return undefined;
+    }
+
+    return new Promise(resolve => {
+      const node: any = shareButtonRef.current;
+      if (typeof node?.measureInWindow !== 'function') {
+        resolve(undefined);
+        return;
+      }
+      node.measureInWindow((x: number, y: number, width: number, height: number) => {
+        resolve({ x, y, width, height });
+      });
+    });
+  }, []);
+
+  const handleShare = async () => {
+    if (!recording) {
+      return;
+    }
+
+    try {
+      const anchorRect =
+        Platform.OS === 'ios' && Platform.isPad ? await measureShareAnchorRect() : undefined;
+
+      await shareRecordingFile(recording, t, {
+        anchorRect,
+        tempFilenamePrefix: 'player-share',
+      });
+    } catch (error) {
+      console.error('[Share][Player] Error sharing recording:', error);
+      Alert.alert(
+        t('common:recordingItem.shareErrorTitle'),
+        t('common:recordingItem.shareErrorMessage')
+      );
+    }
   };
 
   if (!recording) {
@@ -158,6 +200,15 @@ export default function PlayerScreen({ route, navigation }: Props) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity onPress={handleShare} style={styles.actionButton} ref={shareButtonRef}>
+            <View style={[styles.actionButtonIcon, { backgroundColor: colors.card }]}>
+              <Ionicons name="share-outline" size={24} color={colors.primary} />
+            </View>
+            <Text style={[styles.actionButtonLabel, { color: colors.textSecondary }]}>
+              {t('common:recordingItem.share')}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => {
               setNewName(recording.name);
