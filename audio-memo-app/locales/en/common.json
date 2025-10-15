@@ -53,7 +53,15 @@
     "executeCustomInstructions": "Execute custom instructions",
     "transcriptNeededTitle": "Transcript required",
     "waitForTranscription": "Please wait until transcription is complete.",
-    "createTranscriptFirst": "Please create a transcript first."
+    "createTranscriptFirst": "Please create a transcript first.",
+    "share": "Share",
+    "shareDescription": "Export audio file",
+    "sharingUnavailableTitle": "Sharing unavailable",
+    "sharingUnavailableMessage": "File sharing is not supported on this device.",
+    "fileNotFoundTitle": "File not found",
+    "fileNotFoundMessage": "The audio file could not be found.",
+    "shareErrorTitle": "Sharing failed",
+    "shareErrorMessage": "The recording could not be shared."
   },
   "modals": {
     "selectLanguage": "Select Language"

@@ -53,7 +53,15 @@
     "executeCustomInstructions": "Eigene Anweisungen ausführen",
     "transcriptNeededTitle": "Transkript benötigt",
     "waitForTranscription": "Bitte warte, bis die Transkription abgeschlossen ist.",
-    "createTranscriptFirst": "Bitte erstelle zuerst ein Transkript dieser Aufnahme."
+    "createTranscriptFirst": "Bitte erstelle zuerst ein Transkript dieser Aufnahme.",
+    "share": "Teilen",
+    "shareDescription": "Audio-Datei exportieren",
+    "sharingUnavailableTitle": "Teilen nicht verfügbar",
+    "sharingUnavailableMessage": "Das Teilen von Dateien wird auf diesem Gerät nicht unterstützt.",
+    "fileNotFoundTitle": "Datei nicht gefunden",
+    "fileNotFoundMessage": "Die Audio-Datei konnte nicht gefunden werden.",
+    "shareErrorTitle": "Fehler beim Teilen",
+    "shareErrorMessage": "Die Aufnahme konnte nicht geteilt werden."
   },
   "modals": {
     "selectLanguage": "Sprache auswählen"

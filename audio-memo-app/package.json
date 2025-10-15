@@ -19,6 +19,7 @@
     "expo-av": "^16.0.7",
     "expo-clipboard": "^8.0.7",
     "expo-file-system": "^19.0.17",
+    "expo-sharing": "~14.0.7",
     "expo-status-bar": "~3.0.8",
     "i18next": "^25.6.0",
     "nativewind": "^4.2.1",
