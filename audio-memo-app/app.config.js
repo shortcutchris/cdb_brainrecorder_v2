@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.cdb.brainrecorder',
-      buildNumber: '25',
+      buildNumber: '27',
       infoPlist: {
         NSMicrophoneUsageDescription: 'This app needs access to your microphone to record audio memos.',
         UIBackgroundModes: ['audio'],

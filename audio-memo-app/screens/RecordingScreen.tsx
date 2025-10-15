@@ -9,6 +9,7 @@ import {
   requestRecordingPermissionsAsync
 } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/config';
@@ -47,6 +48,9 @@ export default function RecordingScreen({ navigation }: Props) {
   // Duration from recorderState (in seconds)
   const duration = Math.floor(recorderState.durationMillis / 1000);
   const isRecording = recorderState.isRecording;
+
+  // Own state for pause/resume tracking
+  const [isPaused, setIsPaused] = useState(false);
 
   const appState = useRef(AppState.currentState);
 
@@ -139,6 +143,7 @@ export default function RecordingScreen({ navigation }: Props) {
   const handleStop = async () => {
     try {
       console.log('🔴 Stopping recording...');
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       // Stop recording
       await recorder.stop();
@@ -214,6 +219,30 @@ export default function RecordingScreen({ navigation }: Props) {
     );
   };
 
+  const handlePause = async () => {
+    try {
+      console.log('⏸️ Pausing recording...');
+      await recorder.pause();
+      setIsPaused(true);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      console.log('✅ Recording paused');
+    } catch (error) {
+      console.error('❌ Error pausing recording:', error);
+    }
+  };
+
+  const handleResume = async () => {
+    try {
+      console.log('▶️ Resuming recording...');
+      recorder.record();
+      setIsPaused(false);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      console.log('✅ Recording resumed');
+    } catch (error) {
+      console.error('❌ Error resuming recording:', error);
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header with Close Button */}
@@ -227,9 +256,16 @@ export default function RecordingScreen({ navigation }: Props) {
       <View style={styles.content}>
         {/* Recording Indicator */}
         <View style={styles.indicatorContainer}>
-          <Ionicons name="radio-button-on" size={24} color={colors.danger} />
-          <Text style={[styles.recordingText, { color: colors.danger }]}>
-            {t('recording.rec')}
+          <Ionicons
+            name={isPaused ? "pause-circle" : "radio-button-on"}
+            size={24}
+            color={isPaused ? colors.warning : colors.danger}
+          />
+          <Text style={[
+            styles.recordingText,
+            { color: isPaused ? colors.warning : colors.danger }
+          ]}>
+            {isPaused ? t('recording.paused') : t('recording.rec')}
           </Text>
         </View>
 
@@ -240,28 +276,61 @@ export default function RecordingScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {/* Stop Button */}
-        <TouchableOpacity
-          onPress={handleStop}
-          style={[
-            styles.stopButton,
-            {
-              backgroundColor: colors.danger,
-              shadowColor: colors.danger,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-            },
-          ]}
-        >
-          <Ionicons name="stop" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.stopButtonText}>{t('recording.stop')}</Text>
-        </TouchableOpacity>
+        {/* Pause/Resume and Stop Buttons (Side-by-Side) */}
+        <View style={styles.buttonRow}>
+          {/* Pause/Resume Button */}
+          <TouchableOpacity
+            onPress={isPaused ? handleResume : handlePause}
+            style={[
+              styles.actionButton,
+              {
+                backgroundColor: isPaused ? colors.success : colors.warning,
+                shadowColor: isPaused ? colors.success : colors.warning,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+              },
+            ]}
+          >
+            <Ionicons
+              name={isPaused ? "play" : "pause"}
+              size={24}
+              color="#FFFFFF"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.actionButtonText}>
+              {isPaused ? t('recording.resume') : t('recording.pause')}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Stop Button */}
+          <TouchableOpacity
+            onPress={handleStop}
+            style={[
+              styles.actionButton,
+              {
+                backgroundColor: colors.danger,
+                shadowColor: colors.danger,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+              },
+            ]}
+          >
+            <Ionicons name="stop" size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.actionButtonText}>{t('recording.stop')}</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Helper Text */}
-        <Text style={[styles.helperText, { color: colors.textSecondary }]}>
-          {t('recording.stopToSave')}
-        </Text>
+        <View style={styles.helperContainer}>
+          <Text style={[styles.helperText, { color: colors.textSecondary }]}>
+            {isPaused ? t('recording.tapResumeToContinue') : t('recording.tapPauseToPause')}
+          </Text>
+          <Text style={[styles.helperText, { color: colors.textSecondary }]}>
+            {t('recording.tapStopToEnd')}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -318,22 +387,33 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  stopButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  actionButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
-    paddingHorizontal: 48,
     paddingVertical: 16,
     elevation: 8,
+    minWidth: 0,
   },
-  stopButtonText: {
+  actionButtonText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
+  },
+  helperContainer: {
+    marginTop: 24,
+    gap: 4,
   },
   helperText: {
     fontSize: 14,
-    marginTop: 24,
     textAlign: 'center',
   },
 });

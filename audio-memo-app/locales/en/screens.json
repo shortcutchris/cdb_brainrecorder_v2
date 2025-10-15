@@ -11,7 +11,7 @@
   "recording": {
     "title": "Recording",
     "recording": "Recording...",
-    "paused": "Paused",
+    "paused": "PAUSED",
     "finish": "Finish",
     "pause": "Pause",
     "resume": "Resume",
@@ -21,6 +21,9 @@
     "rec": "REC",
     "stop": "Stop",
     "stopToSave": "Stop to save",
+    "tapPauseToPause": "Tap pause to pause recording",
+    "tapResumeToContinue": "Tap resume to continue recording",
+    "tapStopToEnd": "Tap stop to end recording",
     "discardConfirm": "Discard recording?",
     "discardMessage": "Do you really want to discard the current recording?",
     "continueRecording": "Continue recording",

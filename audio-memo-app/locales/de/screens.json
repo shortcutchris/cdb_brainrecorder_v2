@@ -11,7 +11,7 @@
   "recording": {
     "title": "Aufnahme",
     "recording": "Aufnahme läuft...",
-    "paused": "Pausiert",
+    "paused": "PAUSIERT",
     "finish": "Fertig",
     "pause": "Pause",
     "resume": "Fortsetzen",
@@ -21,6 +21,9 @@
     "rec": "REC",
     "stop": "Stopp",
     "stopToSave": "Zum Speichern stoppen",
+    "tapPauseToPause": "Tippe auf Pause um die Aufnahme zu pausieren",
+    "tapResumeToContinue": "Tippe auf Fortsetzen um die Aufnahme fortzusetzen",
+    "tapStopToEnd": "Tippe auf Stopp um die Aufnahme zu beenden",
     "discardConfirm": "Aufnahme verwerfen?",
     "discardMessage": "Möchtest du die aktuelle Aufnahme wirklich verwerfen?",
     "continueRecording": "Weiter aufnehmen",

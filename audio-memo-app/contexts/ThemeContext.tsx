@@ -13,6 +13,7 @@ interface ThemeColors {
   primary: string;
   danger: string;
   success: string;
+  warning: string;
   iconColor: string;
   cardBackground: string;
 }
@@ -33,6 +34,7 @@ const lightColors: ThemeColors = {
   primary: '#ffaa3a',
   danger: '#EF4444',
   success: '#10B981',
+  warning: '#F59E0B',
   iconColor: '#64748B',
   cardBackground: '#FFFFFF',
 };
@@ -46,6 +48,7 @@ const darkColors: ThemeColors = {
   primary: '#ffaa3a',
   danger: '#EF4444',
   success: '#10B981',
+  warning: '#F59E0B',
   iconColor: '#94A3B8',
   cardBackground: '#1E293B',
 };
